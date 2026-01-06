@@ -1,6 +1,6 @@
-# EXPRESSJS BOILERPLATE DOCUMENTATION
+# MTF CRM SERVER DOCUMENTATION
 
-<img src="https://img.shields.io/github/stars/minhtrifit/expressjs-boilerplate"/> ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/minhtrifit/expressjs-boilerplate)
+<img src="https://img.shields.io/github/stars/minhtrifit/mtf-crm-server"/> ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/minhtrifit/mtf-crm-server)
 
 # 📋 Table of Contents
 
@@ -25,8 +25,8 @@
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:3000
-JWT_SECRET=expressjs_boilerplate
-DATABASE_URL="postgresql://postgresql:123456@localhost:5432/expressjs_boilerplate"
+JWT_SECRET=mtf_crm_server
+DATABASE_URL="postgresql://postgresql:123456@localhost:5432/mtf_crm_db"
 ```
 
 ## 📦 Installation <a name="installation"></a>
