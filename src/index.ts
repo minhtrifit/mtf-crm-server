@@ -11,6 +11,7 @@ import { HTTP_STATUS } from './constants/http-status-code';
 import userRoutes from './routes/user.router';
 import authRoutes from './routes/auth.router';
 import uploadRoutes from './routes/upload.router';
+import categoryRoutes from './routes/category.router';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/category', categoryRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);

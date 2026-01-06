@@ -42,7 +42,7 @@ model User {
 }
 
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   name      String
   phone     String   @unique
   email     String
@@ -55,23 +55,26 @@ model Customer {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   name      String   @unique
   imageUrl  String
+  isActive  Boolean  @default(true)
   products  Product[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String
   sku         String   @unique
   price       Float
+  imagesUrl   String[]
   description String
   isActive    Boolean  @default(true)
 
-  categoryId  Int
+  categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
 
   orderItems  OrderItem[]
@@ -83,12 +86,12 @@ model Product {
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
+  id          String   @id @default(uuid())
   orderCode   String      @unique
   totalAmount Float
   status      OrderStatus @default(PENDING)
 
-  customerId  Int
+  customerId  String
   customer    Customer    @relation(fields: [customerId], references: [id])
 
   items       OrderItem[]
@@ -102,22 +105,22 @@ model Order {
 }
 
 model OrderItem {
-  id        Int     @id @default(autoincrement())
-  orderId  Int
-  productId Int
-  quantity Int
-  price    Float
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
 
-  order    Order   @relation(fields: [orderId], references: [id])
-  product  Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])
 }
 
 model Payment {
-  id        Int           @id @default(autoincrement())
-  orderId  Int
+  id       String   @id @default(uuid())
+  orderId  String
   amount   Float
   method   PaymentMethod
   paidAt   DateTime       @default(now())

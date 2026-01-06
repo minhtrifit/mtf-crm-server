@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import { HTTP_STATUS } from '@/constants/http-status-code';
+import Joi from 'joi';
 import { prisma } from '@/libs/prisma';
-import { hashPassword, isValidRole } from '@/libs/auth';
-import { Role, UserPayload } from '@/models/User';
+import { HTTP_STATUS } from '@/constants/http-status-code';
 import { PagingType } from '@/models';
+import { CategoryBase } from '@/models/Category';
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const CreateSchema = Joi.object({
+  name: Joi.string().required(),
+  imageUrl: Joi.string().required()
+});
+
+export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 10, 100);
@@ -19,18 +24,18 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     const where: any = {
       ...(isActive !== undefined && { isActive }),
       ...(q && {
-        OR: [{ email: { contains: q, mode: 'insensitive' } }, { fullName: { contains: q, mode: 'insensitive' } }]
+        OR: [{ name: { contains: q, mode: 'insensitive' } }]
       })
     };
 
     const [data, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.category.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.user.count({ where })
+      prisma.category.count({ where })
     ]);
 
     const paging: PagingType = {
@@ -52,137 +57,133 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Check client id
     const id = req.params.id;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'User ID not found'
+        message: 'Category ID is required'
       });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
+    // Find Category with ID
+    const category = await prisma.category.findUnique({
       where: { id: id }
     });
 
-    if (!user) {
+    if (!category) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'User not found'
+        message: 'Category not found'
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: user,
-      message: 'Get user successfully'
+      data: category,
+      message: 'Get category successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, fullName, role } = req.body;
-
-    // Check role
-    if (role && !isValidRole(role)) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: 'Role is not existed'
-      });
-    }
-
-    // Find user with email
-    const existedUser = await prisma.user.findUnique({
-      where: { email: email }
+    const { error, value } = CreateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
     });
 
-    if (existedUser) {
+    if (error) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'User email is existed'
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
       });
     }
 
-    // Hash user password
-    const hashedPassword = await hashPassword(password);
+    const { name, imageUrl } = value;
 
-    const newUser: UserPayload = {
-      email: email,
-      password: hashedPassword,
-      fullName: fullName,
-      role: role ? role : Role.USER
+    // Find Category with Name
+    const existedCategory = await prisma.category.findUnique({
+      where: { name: name }
+    });
+
+    if (existedCategory) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: 'Category name is existed'
+      });
+    }
+
+    const payload: CategoryBase = {
+      name: name,
+      imageUrl: imageUrl
     };
 
-    const user = await prisma.user.create({
-      data: newUser
+    const category = await prisma.category.create({
+      data: payload
     });
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      data: user,
-      message: 'Created user successfully'
+      data: category,
+      message: 'Create category successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { email, fullName, password, isActive } = req.body;
+    const { name, imageUrl, isActive } = req.body;
 
     // 1. Validate: At least one field
-    if (fullName === undefined && email === undefined && password === undefined && isActive === undefined) {
+    if (name === undefined && imageUrl === undefined && isActive === undefined) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: 'At least one field is required'
       });
     }
 
-    // 2. Check user by ID
-    const user = await prisma.user.findUnique({
+    // 2. Check category by ID
+    const category = await prisma.category.findUnique({
       where: { id }
     });
 
-    if (!user) {
+    if (!category) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: 'User not found'
+        message: 'Category not found'
       });
     }
 
     // 3. Build data update
     const data: any = {};
 
-    if (fullName !== undefined) data.fullName = fullName;
-    if (email !== undefined) data.email = email;
+    if (name !== undefined) data.name = name;
+    if (imageUrl !== undefined) data.imageUrl = imageUrl;
     if (isActive !== undefined) data.isActive = isActive;
 
-    if (password !== undefined) {
-      const hashedPassword = await hashPassword(password);
-      data.password = hashedPassword;
-    }
-
     // 4. Update
-    const updatedUser = await prisma.user.update({
+    const updatedCategory = await prisma.category.update({
       where: { id },
       data,
       select: {
         id: true,
-        fullName: true,
-        email: true,
+        name: true,
+        imageUrl: true,
         isActive: true,
         updatedAt: true
       }
@@ -190,8 +191,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: updatedUser,
-      message: 'Update user successfully'
+      data: updatedCategory,
+      message: 'Update category successfully'
     });
   } catch (error) {
     next(error);

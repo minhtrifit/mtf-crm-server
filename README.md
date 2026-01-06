@@ -235,3 +235,58 @@ npm run prisma:seed
 | ------- | ---- | -------- |
 | `files` | File | ✅       |
 | `name`  | Text | ❌       |
+
+**Category**
+
+- Get categories list
+
+`[GET]`: `http://localhost:5000/api/category`
+
+### Query Parameters
+
+| Query      | Type    | Required | Description                                  |
+| ---------- | ------- | -------- | -------------------------------------------- |
+| `page`     | number  | ❌       | Current page (default: `1`)                  |
+| `limit`    | number  | ❌       | Items per page (default: `10`, max: `100`)   |
+| `q`        | string  | ❌       | Search by `name`                             |
+| `isActive` | boolean | ❌       | Filter by isActive status (`true` / `false`) |
+
+- Get category by id
+
+`[GET]`: `http://localhost:5000/api/category/:id`
+
+- Create new category
+
+`[POST]`: `http://localhost:5000/api/category`
+
+### Request Body
+
+| Query      | Type   | Required |
+| ---------- | ------ | -------- |
+| `name`     | string | ✅       |
+| `imageUrl` | string | ✅       |
+
+```json
+{
+  "name": "Category 1",
+  "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg"
+}
+```
+
+- Update category
+
+`[PATCH]`: `http://localhost:5000/api/category/:id`
+
+### Request Body
+
+| Query      | Type   | Required |
+| ---------- | ------ | -------- |
+| `name`     | string | ❌       |
+| `imageUrl` | string | ❌       |
+
+```json
+{
+  "name": "Category 1",
+  "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg"
+}
+```
