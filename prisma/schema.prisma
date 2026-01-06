@@ -34,8 +34,12 @@ model User {
   email     String   @unique
   password  String
   fullName  String
+  phone     String?   @unique
+  address   String?
   role      Role     @default(USER)
   isActive  Boolean  @default(true)
+
+  orders    Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -57,6 +61,7 @@ model Customer {
 model Category {
   id        String   @id @default(uuid())
   name      String   @unique
+  slug      String   @unique
   imageUrl  String
   isActive  Boolean  @default(true)
   products  Product[]
@@ -86,13 +91,18 @@ model Product {
 }
 
 model Order {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   orderCode   String      @unique
   totalAmount Float
   status      OrderStatus @default(PENDING)
 
-  customerId  String
-  customer    Customer    @relation(fields: [customerId], references: [id])
+  // Website order
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+
+  // Admin order
+  customerId  String?
+  customer    Customer?   @relation(fields: [customerId], references: [id])
 
   items       OrderItem[]
   payments    Payment[]
@@ -100,8 +110,8 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  @@index([userId])
   @@index([customerId])
-  @@index([createdAt])
 }
 
 model OrderItem {

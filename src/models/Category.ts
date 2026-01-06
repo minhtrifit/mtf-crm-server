@@ -1,5 +1,6 @@
 export interface CategoryBase {
   name: string;
+  slug: string;
   imageUrl: string;
 }
 

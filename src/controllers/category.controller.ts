@@ -7,6 +7,7 @@ import { CategoryBase } from '@/models/Category';
 
 export const CreateSchema = Joi.object({
   name: Joi.string().required(),
+  slug: Joi.string().required(),
   imageUrl: Joi.string().required()
 });
 
@@ -110,23 +111,26 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    const { name, imageUrl } = value;
+    const { name, slug, imageUrl } = value;
 
     // Find Category with Name
-    const existedCategory = await prisma.category.findUnique({
-      where: { name: name }
+    const existedCategory = await prisma.category.findFirst({
+      where: {
+        OR: [{ name }, { slug }]
+      }
     });
 
     if (existedCategory) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Category name is existed'
+        message: 'Category is existed'
       });
     }
 
     const payload: CategoryBase = {
       name: name,
+      slug: slug,
       imageUrl: imageUrl
     };
 
