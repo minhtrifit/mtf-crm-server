@@ -19,4 +19,6 @@ export interface User extends UserBase {
 
 export interface UserPayload extends UserBase {
   role: Role;
+  phone: string | null;
+  address: string | null;
 }

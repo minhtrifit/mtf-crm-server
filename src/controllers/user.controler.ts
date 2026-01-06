@@ -19,7 +19,11 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     const where: any = {
       ...(isActive !== undefined && { isActive }),
       ...(q && {
-        OR: [{ email: { contains: q, mode: 'insensitive' } }, { fullName: { contains: q, mode: 'insensitive' } }]
+        OR: [
+          { email: { contains: q, mode: 'insensitive' } },
+          { fullName: { contains: q, mode: 'insensitive' } },
+          { phone: { contains: q, mode: 'insensitive' } }
+        ]
       })
     };
 
@@ -90,7 +94,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, fullName, role } = req.body;
+    const { email, password, fullName, phone, address, role } = req.body;
 
     // Check role
     if (role && !isValidRole(role)) {
@@ -102,16 +106,32 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     }
 
     // Find user with email
-    const existedUser = await prisma.user.findUnique({
+    const existedEmail = await prisma.user.findUnique({
       where: { email: email }
     });
 
-    if (existedUser) {
+    if (existedEmail) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
         message: 'User email is existed'
       });
+    }
+
+    // Find user with phone if client request
+    if (phone) {
+      // Find user with phone
+      const existedPhone = await prisma.user.findUnique({
+        where: { phone: phone }
+      });
+
+      if (existedPhone) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'User phone is existed'
+        });
+      }
     }
 
     // Hash user password
@@ -121,6 +141,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       email: email,
       password: hashedPassword,
       fullName: fullName,
+      phone: phone ? phone : null,
+      address: address ? address : null,
       role: role ? role : Role.USER
     };
 
@@ -141,7 +163,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { email, fullName, password, isActive } = req.body;
+    const { email, fullName, password, phone, address, isActive } = req.body;
 
     // 1. Validate: At least one field
     if (fullName === undefined && email === undefined && password === undefined && isActive === undefined) {
@@ -167,7 +189,49 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const data: any = {};
 
     if (fullName !== undefined) data.fullName = fullName;
-    if (email !== undefined) data.email = email;
+    if (email !== undefined) {
+      // Find user with email
+      const existedEmail = await prisma.user.findFirst({
+        where: {
+          email: email,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedEmail) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'User email is existed'
+        });
+      }
+
+      data.email = email;
+    }
+    if (phone !== undefined && phone !== null) {
+      // Find user with phone
+      const existedPhone = await prisma.user.findFirst({
+        where: {
+          phone: phone,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedPhone) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'User phone is existed'
+        });
+      }
+
+      data.phone = phone;
+    }
+    if (address !== undefined) data.address = address;
     if (isActive !== undefined) data.isActive = isActive;
 
     if (password !== undefined) {
