@@ -1,7 +1,11 @@
-import { faker } from '@faker-js/faker';
+import { Faker, vi, en, base } from '@faker-js/faker';
 import { prisma } from '../src/libs/prisma';
 import { hashPassword } from '../src/libs/auth';
 import { Role } from '../src/models/User';
+
+const faker = new Faker({
+  locale: [vi, en, base]
+});
 
 async function main() {
   const password = await hashPassword('123456');
@@ -16,19 +20,21 @@ async function main() {
     }
   ];
 
-  const generatedUsers = Array.from({ length: 30 }).map(() => {
+  const generatedUsers = Array.from({ length: 100 }).map(() => {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
 
     return {
-      email: faker.internet.email({
-        firstName,
-        lastName,
-        provider: 'gmail.com'
-      }),
+      email: faker.internet
+        .email({
+          firstName,
+          lastName,
+          provider: 'gmail.com'
+        })
+        .toLowerCase(),
       password,
-      fullName: `${firstName} ${lastName}`,
-      phone: faker.helpers.arrayElement([faker.phone.number('09########' as unknown as { style?: 'national' }), null]),
+      fullName: `${lastName} ${firstName}`,
+      phone: faker.helpers.arrayElement(['0' + faker.string.numeric(9), null]),
       address: faker.helpers.arrayElement([faker.location.streetAddress(), null]),
       role: Role.USER,
       isActive: faker.datatype.boolean()
@@ -88,6 +94,20 @@ async function main() {
     }
   ];
 
+  const customers = [];
+
+  for (let i = 0; i < 100; i++) {
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+
+    customers.push({
+      fullName: `${lastName} ${firstName}`,
+      phone: '0' + faker.string.numeric(9),
+      email: faker.internet.email().toLowerCase(),
+      address: faker.location.streetAddress()
+    });
+  }
+
   // Seed user
   await prisma.user.createMany({
     data: [...baseUsers, ...generatedUsers],
@@ -98,6 +118,12 @@ async function main() {
   await prisma.category.createMany({
     data: categories,
     skipDuplicates: true // tránh lỗi unique khi seed lại
+  });
+
+  // Seed customer
+  await prisma.customer.createMany({
+    data: customers,
+    skipDuplicates: true // tránh lỗi trùng phone
   });
 
   console.log('✅ Seed successfully');

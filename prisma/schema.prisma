@@ -34,8 +34,8 @@ model User {
   email     String   @unique
   password  String
   fullName  String
-  phone     String?   @unique
-  address   String?
+  phone     String?  @unique
+  address   String?  
   role      Role     @default(USER)
   isActive  Boolean  @default(true)
 
@@ -47,9 +47,9 @@ model User {
 
 model Customer {
   id        String   @id @default(uuid())
-  name      String
+  fullName  String
   phone     String   @unique
-  email     String
+  email     String?
   address   String
 
   orders    Order[]

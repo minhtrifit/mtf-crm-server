@@ -1,12 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
 import { prisma } from '@/libs/prisma';
 import { comparePassword, generateToken, hashPassword } from '@/libs/auth';
 import { Role, UserPayload } from '@/models/User';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 
+export const CreateSchema = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required(),
+  fullName: Joi.string().required(),
+  phone: Joi.string().allow('', null),
+  address: Joi.string().allow('', null)
+});
+
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, fullName } = req.body;
+    const { error, value } = CreateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { email, password, fullName, phone, address } = value;
 
     // Find user with email
     const existedUser = await prisma.user.findUnique({
@@ -28,6 +53,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       email: email,
       password: hashedPassword,
       fullName: fullName,
+      phone: phone ? phone : null,
+      address: address ? address : null,
       role: Role.USER
     };
 

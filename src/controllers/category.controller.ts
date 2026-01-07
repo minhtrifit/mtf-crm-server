@@ -189,6 +189,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
         name: true,
         imageUrl: true,
         isActive: true,
+        createdAt: true,
         updatedAt: true
       }
     });

@@ -107,7 +107,7 @@ npm run prisma:seed
 | ---------- | ------- | -------- | -------------------------------------------- |
 | `page`     | number  | ❌       | Current page (default: `1`)                  |
 | `limit`    | number  | ❌       | Items per page (default: `10`, max: `100`)   |
-| `q`        | string  | ❌       | Search by `email` or `name`                  |
+| `q`        | string  | ❌       | Search by `email` or `fullName`              |
 | `isActive` | boolean | ❌       | Filter by isActive status (`true` / `false`) |
 
 - Get user by id
@@ -125,6 +125,8 @@ npm run prisma:seed
 | `email`    | string            | ✅       |
 | `fullName` | string            | ✅       |
 | `password` | string            | ✅       |
+| `phone`    | string            | ❌       |
+| `address`  | string            | ❌       |
 | `role`     | `ADMIN` or `USER` | ❌       |
 
 ```json
@@ -132,6 +134,8 @@ npm run prisma:seed
   "email": "tri@example.com",
   "fullName": "minhtrifit",
   "password": "123456",
+  "phone": "123456789",
+  "address": "HCM",
   "role": "USER" | "ADMIN"
 }
 ```
@@ -147,6 +151,8 @@ npm run prisma:seed
 | `email`    | string            | ❌       |
 | `fullName` | string            | ❌       |
 | `password` | string            | ❌       |
+| `phone`    | string            | ❌       |
+| `address`  | string            | ❌       |
 | `role`     | `ADMIN` or `USER` | ❌       |
 
 ```json
@@ -154,6 +160,8 @@ npm run prisma:seed
   "email": "tri@example.com",
   "fullName": "minhtrifit",
   "password": "123456",
+  "phone": "123456789",
+  "address": "HCM",
   "role": "USER" | "ADMIN"
 }
 ```
@@ -264,11 +272,13 @@ npm run prisma:seed
 | Query      | Type   | Required |
 | ---------- | ------ | -------- |
 | `name`     | string | ✅       |
+| `slug`     | string | ✅       |
 | `imageUrl` | string | ✅       |
 
 ```json
 {
   "name": "Category 1",
+  "slug": "category-1",
   "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg"
 }
 ```
@@ -282,11 +292,75 @@ npm run prisma:seed
 | Query      | Type   | Required |
 | ---------- | ------ | -------- |
 | `name`     | string | ❌       |
+| `slug`     | string | ❌       |
 | `imageUrl` | string | ❌       |
 
 ```json
 {
   "name": "Category 1",
+  "slug": "category-1",
   "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg"
+}
+```
+
+**Customer**
+
+- Get customer list
+
+`[GET]`: `http://localhost:5000/api/customer`
+
+### Query Parameters
+
+| Query   | Type   | Required | Description                                |
+| ------- | ------ | -------- | ------------------------------------------ |
+| `page`  | number | ❌       | Current page (default: `1`)                |
+| `limit` | number | ❌       | Items per page (default: `10`, max: `100`) |
+| `q`     | string | ❌       | Search by `email` or `fullName` or `phone` |
+
+- Get customer by id
+
+`[GET]`: `http://localhost:5000/api/customer/:id`
+
+- Create new customer
+
+`[POST]`: `http://localhost:5000/api/customer`
+
+### Request Body
+
+| Query      | Type   | Required |
+| ---------- | ------ | -------- |
+| `email`    | string | ✅       |
+| `fullName` | string | ✅       |
+| `phone`    | string | ✅       |
+| `address`  | string | ❌       |
+
+```json
+{
+  "email": "tri@example.com",
+  "fullName": "minhtrifit",
+  "phone": "123456789",
+  "address": "HCM"
+}
+```
+
+- Update customer
+
+`[PATCH]`: `http://localhost:5000/api/customer/:id`
+
+### Request Body
+
+| Query      | Type   | Required |
+| ---------- | ------ | -------- |
+| `email`    | string | ❌       |
+| `fullName` | string | ❌       |
+| `phone`    | string | ❌       |
+| `address`  | string | ❌       |
+
+```json
+{
+  "email": "tri@example.com",
+  "fullName": "minhtrifit",
+  "phone": "123456789",
+  "address": "HCM"
 }
 ```

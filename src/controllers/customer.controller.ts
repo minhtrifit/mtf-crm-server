@@ -1,25 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { HTTP_STATUS } from '@/constants/http-status-code';
 import { prisma } from '@/libs/prisma';
-import { hashPassword, isValidRole } from '@/libs/auth';
-import { Role, UserPayload } from '@/models/User';
+import { BaseCustomer } from '@/models/Customer';
 import { PagingType } from '@/models';
-
-const roleValues = Object.values(Role);
+import { HTTP_STATUS } from '@/constants/http-status-code';
 
 export const CreateSchema = Joi.object({
-  email: Joi.string().required(),
-  password: Joi.string().required(),
   fullName: Joi.string().required(),
-  phone: Joi.string().allow('', null),
-  address: Joi.string().allow('', null),
-  role: Joi.string()
-    .valid(...roleValues)
-    .optional()
+  phone: Joi.string().required(),
+  email: Joi.string().allow('', null),
+  address: Joi.string().required()
 });
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 10, 100);
@@ -42,13 +35,13 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     };
 
     const [data, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.customer.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.user.count({ where })
+      prisma.customer.count({ where })
     ]);
 
     const paging: PagingType = {
@@ -70,43 +63,42 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Check client id
     const id = req.params.id;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'User ID not found'
+        message: 'Customer ID is required'
       });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
+    // Find Customer with ID
+    const customer = await prisma.customer.findUnique({
       where: { id: id }
     });
 
-    if (!user) {
+    if (!customer) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'User not found'
+        message: 'Customer not found'
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: user,
-      message: 'Get user successfully'
+      data: customer,
+      message: 'Get customer successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
@@ -124,94 +116,64 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       });
     }
 
-    const { email, password, fullName, phone, address, role } = value;
+    const { fullName, phone, email, address } = value;
 
-    // Check role
-    // if (role && !isValidRole(role)) {
-    //   return res.status(HTTP_STATUS.BAD_REQUEST).json({
-    //     success: false,
-    //     data: null,
-    //     message: 'Role is not existed'
-    //   });
-    // }
-
-    // Find user with email
-    const existedEmail = await prisma.user.findUnique({
-      where: { email: email }
+    // Find Customer with phone
+    const existedCustomer = await prisma.customer.findFirst({
+      where: { phone: phone }
     });
 
-    if (existedEmail) {
+    if (existedCustomer) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'User email is existed'
+        message: 'Customer phone is existed'
       });
     }
 
-    // Find user with phone if client request
-    if (phone) {
-      // Find user with phone
-      const existedPhone = await prisma.user.findUnique({
-        where: { phone: phone }
-      });
-
-      if (existedPhone) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: 'User phone is existed'
-        });
-      }
-    }
-
-    // Hash user password
-    const hashedPassword = await hashPassword(password);
-
-    const newUser: UserPayload = {
-      email: email,
-      password: hashedPassword,
+    const newCustomer: BaseCustomer = {
       fullName: fullName,
-      phone: phone ? phone : null,
-      address: address ? address : null,
-      role: role ? role : Role.USER
+      phone: phone,
+      email: email ? email : null,
+      address: address
     };
 
-    const user = await prisma.user.create({
-      data: newUser
+    const customer = await prisma.customer.create({
+      data: newCustomer
     });
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      data: user,
-      message: 'Created user successfully'
+      data: customer,
+      message: 'Create customer successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { email, fullName, password, phone, address, isActive } = req.body;
+    const { fullName, phone, email, address } = req.body;
 
     // 1. Validate: At least one field
-    if (fullName === undefined && email === undefined && password === undefined && isActive === undefined) {
+    if (fullName === undefined && phone === undefined && email === undefined) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: 'At least one field is required'
       });
     }
 
-    // 2. Check user by ID
-    const user = await prisma.user.findUnique({
+    // 2. Check customer by ID
+    const customer = await prisma.customer.findUnique({
       where: { id }
     });
 
-    if (!user) {
+    if (!customer) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: 'User not found'
+        message: 'Customer not found'
       });
     }
 
@@ -219,36 +181,14 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const data: any = {};
 
     if (fullName !== undefined) data.fullName = fullName;
-    if (email !== undefined) {
-      // Find user with email
-      const existedEmail = await prisma.user.findFirst({
-        where: {
-          email: email,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedEmail) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: 'User email is existed'
-        });
-      }
-
-      data.email = email;
-    }
     if (phone !== undefined) {
-      // Find user with phone
-      const existedPhone = await prisma.user.findFirst({
+      // Find customer with phone
+      const existedPhone = await prisma.customer.findFirst({
         where: {
           phone: phone,
           NOT: {
             id: id
-          },
-          AND: [{ phone: { not: null } }, { phone: { not: '' } }]
+          }
         }
       });
 
@@ -256,22 +196,17 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'User phone is existed'
+          message: 'Customer phone is existed'
         });
       }
 
       data.phone = phone;
     }
+    if (email !== undefined) data.email = email;
     if (address !== undefined) data.address = address;
-    if (isActive !== undefined) data.isActive = isActive;
-
-    if (password !== undefined) {
-      const hashedPassword = await hashPassword(password);
-      data.password = hashedPassword;
-    }
 
     // 4. Update
-    const updatedUser = await prisma.user.update({
+    const updatedCustomer = await prisma.customer.update({
       where: { id },
       data,
       select: {
@@ -280,7 +215,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         email: true,
         phone: true,
         address: true,
-        isActive: true,
         createdAt: true,
         updatedAt: true
       }
@@ -288,8 +222,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: updatedUser,
-      message: 'Update user successfully'
+      data: updatedCustomer,
+      message: 'Update customer successfully'
     });
   } catch (error) {
     next(error);
