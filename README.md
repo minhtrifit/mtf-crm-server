@@ -95,7 +95,7 @@ npm run prisma:seed
 
 ## 📝 API List<a name="api-list"></a>
 
-**User**
+> **User**
 
 - Get user list
 
@@ -190,7 +190,7 @@ npm run prisma:seed
 }
 ```
 
-**Auth**
+> **Auth**
 
 - Register
 
@@ -230,7 +230,7 @@ npm run prisma:seed
 }
 ```
 
-**Upload**
+> **Upload**
 
 - Single upload
 
@@ -268,7 +268,7 @@ npm run prisma:seed
 | `files` | File | ✅       |
 | `name`  | Text | ❌       |
 
-**Category**
+> **Category**
 
 - Get categories list
 
@@ -339,7 +339,7 @@ npm run prisma:seed
 }
 ```
 
-**Customer**
+> **Customer**
 
 - Get customer list
 
@@ -425,7 +425,7 @@ npm run prisma:seed
 }
 ```
 
-**Product**
+> **Product**
 
 - Get product list
 
