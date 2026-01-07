@@ -15,6 +15,8 @@ export const CreateSchema = Joi.object({
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
+
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
@@ -42,7 +44,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'User email is existed'
+        message: t('auth.user_email_existed')
       });
     }
 
@@ -65,7 +67,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: user,
-      message: 'Register successfully'
+      message: t('auth.register_success')
     });
   } catch (error) {
     next(error);
@@ -74,13 +76,14 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Email or password are missing'
+        message: t('auth.email_password_required')
       });
     }
 
@@ -93,7 +96,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'User not found'
+        message: t('auth.user_not_found')
       });
     }
 
@@ -104,7 +107,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Password not match'
+        message: t('auth.email_password_not_match')
       });
     }
 
@@ -115,14 +118,14 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
         data: null,
-        message: 'Authorzied failed'
+        message: t('auth.authorized_failed')
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: { ...user, token },
-      message: 'Login successfully'
+      message: t('auth.login_success')
     });
   } catch (error) {
     next(error);
