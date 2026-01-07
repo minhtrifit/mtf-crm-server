@@ -101,6 +101,12 @@ npm run prisma:seed
 
 `[GET]`: `http://localhost:5000/api/users`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 ### Query Parameters
 
 | Query      | Type    | Required | Description                                  |
@@ -114,9 +120,21 @@ npm run prisma:seed
 
 `[GET]`: `http://localhost:5000/api/users/:id`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 - Create new user
 
 `[POST]`: `http://localhost:5000/api/users`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
 
 ### Request Body
 
@@ -143,6 +161,12 @@ npm run prisma:seed
 - Update user
 
 `[PATCH]`: `http://localhost:5000/api/users/:id`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
 
 ### Request Body
 
@@ -267,6 +291,12 @@ npm run prisma:seed
 
 `[POST]`: `http://localhost:5000/api/category`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 ### Request Body
 
 | Query      | Type   | Required |
@@ -286,6 +316,12 @@ npm run prisma:seed
 - Update category
 
 `[PATCH]`: `http://localhost:5000/api/category/:id`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
 
 ### Request Body
 
@@ -309,6 +345,12 @@ npm run prisma:seed
 
 `[GET]`: `http://localhost:5000/api/customer`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 ### Query Parameters
 
 | Query   | Type   | Required | Description                                |
@@ -321,9 +363,21 @@ npm run prisma:seed
 
 `[GET]`: `http://localhost:5000/api/customer/:id`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 - Create new customer
 
 `[POST]`: `http://localhost:5000/api/customer`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
 
 ### Request Body
 
@@ -347,6 +401,12 @@ npm run prisma:seed
 
 `[PATCH]`: `http://localhost:5000/api/customer/:id`
 
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
 ### Request Body
 
 | Query      | Type   | Required |
@@ -362,5 +422,97 @@ npm run prisma:seed
   "fullName": "minhtrifit",
   "phone": "123456789",
   "address": "HCM"
+}
+```
+
+**Product**
+
+- Get product list
+
+`[GET]`: `http://localhost:5000/api/product`
+
+### Query Parameters
+
+| Query          | Type   | Required | Description                                |
+| -------------- | ------ | -------- | ------------------------------------------ |
+| `page`         | number | ❌       | Current page (default: `1`)                |
+| `limit`        | number | ❌       | Items per page (default: `10`, max: `100`) |
+| `q`            | string | ❌       | Search by `name` or `slug` or `sku`        |
+| `categoryId`   | string | ❌       | Search by `Category ID`                    |
+| `categorySlug` | string | ❌       | Search by `Category Slug`                  |
+
+- Get product by id
+
+`[GET]`: `http://localhost:5000/api/product/:id`
+
+- Create new product
+
+`[POST]`: `http://localhost:5000/api/product`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+### Request Body
+
+| Query         | Type     | Required |
+| ------------- | -------- | -------- |
+| `name`        | string   | ✅       |
+| `slug`        | string   | ✅       |
+| `sku`         | string   | ✅       |
+| `price`       | number   | ✅       |
+| `imagesUrl`   | string[] | ✅       |
+| `description` | string   | ✅       |
+| `isActive`    | boolean  | ✅       |
+| `categoryId`  | string   | ✅       |
+
+```json
+{
+  "name": "Sản phẩm 1",
+  "slug": "san-pham-1",
+  "sku": "product-1",
+  "price": 350000,
+  "imagesUrl": ["http://localhost:5000/uploads/1767709707010-368704716.jpeg"],
+  "description": "t-shirt black",
+  "isActive": true,
+  "categoryId": "c529266e-7706-4809-b784-cfcb81596e20"
+}
+```
+
+- Update product
+
+`[PATCH]`: `http://localhost:5000/api/product/:id`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+### Request Body
+
+| Query         | Type     | Required |
+| ------------- | -------- | -------- |
+| `name`        | string   | ❌       |
+| `slug`        | string   | ❌       |
+| `sku`         | string   | ❌       |
+| `price`       | number   | ❌       |
+| `imagesUrl`   | string[] | ❌       |
+| `description` | string   | ❌       |
+| `isActive`    | boolean  | ❌       |
+| `categoryId`  | string   | ❌       |
+
+```json
+{
+  "name": "Sản phẩm 1",
+  "slug": "san-pham-1",
+  "sku": "product-1",
+  "price": 125000,
+  "imagesUrl": ["http://localhost:5000/uploads/1767709707010-368704716.jpeg"],
+  "description": "t-shirt black",
+  "isActive": true,
+  "categoryId": "c529266e-7706-4809-b784-cfcb81596e20"
 }
 ```

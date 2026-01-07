@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.router';
 import uploadRoutes from './routes/upload.router';
 import categoryRoutes from './routes/category.router';
 import customerRoutes from './routes/customer.router';
+import productRoutes from './routes/product.router';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/customer', customerRoutes);
+app.use('/api/product', productRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);

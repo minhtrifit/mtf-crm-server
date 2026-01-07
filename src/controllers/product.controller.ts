@@ -1,0 +1,365 @@
+import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
+import { prisma } from '@/libs/prisma';
+import { HTTP_STATUS } from '@/constants/http-status-code';
+import { ProductBase } from '@/models/Product';
+import { PagingType } from '@/models';
+
+export const CreateSchema = Joi.object({
+  name: Joi.string().required(),
+  slug: Joi.string()
+    .pattern(/^[a-z0-9-]+$/)
+    .required(),
+  sku: Joi.string().required(),
+  price: Joi.number().positive().required(),
+  imagesUrl: Joi.array().items(Joi.string().uri()).min(1).required(),
+  description: Joi.string().allow('').required(),
+  isActive: Joi.boolean().required(),
+  categoryId: Joi.string().required()
+});
+
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 10, 100);
+
+    const q = (req.query.q as string)?.trim();
+    const categoryId = (req.query.categoryId as string)?.trim();
+    const categorySlug = (req.query.categorySlug as string)?.trim();
+    const isActive = req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined;
+
+    const skip = (page - 1) * limit;
+
+    // Build where condition
+    const where: any = {
+      ...(isActive !== undefined && { isActive }),
+      ...(categoryId && { categoryId }),
+      ...(categorySlug && {
+        category: {
+          slug: categorySlug
+        }
+      }),
+      ...(q && {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { slug: { contains: q, mode: 'insensitive' } },
+          { sku: { contains: q, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              imageUrl: true,
+              isActive: true
+            }
+          }
+        }
+      }),
+      prisma.product.count({ where })
+    ]);
+
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        data,
+        paging
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: 'Product ID is required'
+      });
+    }
+
+    // Find Product with ID
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            imageUrl: true,
+            isActive: true
+          }
+        }
+      }
+    });
+
+    if (!product) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: 'Product not found'
+      });
+    }
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: product,
+      message: 'Get product successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { error, value } = CreateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = value;
+
+    // Find Product with Name
+    const existedProduct = await prisma.product.findFirst({
+      where: {
+        OR: [{ name }, { slug }, { sku }]
+      }
+    });
+
+    if (existedProduct) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: 'Product is existed'
+      });
+    }
+
+    // Find Category with categoryId
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
+
+    if (!category) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: 'Category not found'
+      });
+    }
+
+    const payload: ProductBase = {
+      name: name,
+      slug: slug,
+      sku: sku,
+      price: price,
+      imagesUrl: imagesUrl,
+      description: description,
+      isActive: isActive,
+      categoryId: categoryId
+    };
+
+    const product = await prisma.product.create({
+      data: payload
+    });
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: product,
+      message: 'Create product successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = req.body;
+
+    // 1. Validate: At least one field
+    if (
+      name === undefined &&
+      slug === undefined &&
+      sku === undefined &&
+      price === undefined &&
+      imagesUrl === undefined &&
+      description === undefined &&
+      isActive === undefined &&
+      categoryId === undefined
+    ) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: 'At least one field is required'
+      });
+    }
+
+    // 2. Check product by ID
+    const product = await prisma.product.findUnique({
+      where: { id }
+    });
+
+    if (!product) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // 3. Build data update
+    const data: any = {};
+
+    if (name !== undefined) {
+      // Find product with name
+      const existedProduct = await prisma.product.findFirst({
+        where: {
+          name: name,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedProduct) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Product name is existed'
+        });
+      }
+
+      data.name = name;
+    }
+    if (slug !== undefined) {
+      // Find product with slug
+      const existedProduct = await prisma.product.findFirst({
+        where: {
+          slug: slug,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedProduct) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Product slug is existed'
+        });
+      }
+
+      data.slug = slug;
+    }
+    if (sku !== undefined) {
+      // Find product with sku
+      const existedProduct = await prisma.product.findFirst({
+        where: {
+          sku: sku,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedProduct) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Product sku is existed'
+        });
+      }
+
+      data.sku = sku;
+    }
+    if (price !== undefined) data.price = price;
+    if (imagesUrl !== undefined) data.imagesUrl = imagesUrl;
+    if (description !== undefined) data.description = description;
+    if (categoryId !== undefined) {
+      // Find Category with categoryId
+      const category = await prisma.category.findUnique({
+        where: { id: categoryId }
+      });
+
+      if (!category) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Category not found'
+        });
+      }
+
+      data.categoryId = categoryId;
+    }
+    if (isActive !== undefined) data.isActive = isActive;
+
+    // 4. Update
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        price: true,
+        description: true,
+        imagesUrl: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            imageUrl: true,
+            isActive: true
+          }
+        },
+        isActive: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: updatedProduct,
+      message: 'Update product successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

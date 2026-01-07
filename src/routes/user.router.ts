@@ -4,9 +4,9 @@ import { authenticateHandler } from '@/middlewares/auth';
 
 const router = Router();
 
-router.get('/', getUsers);
-router.get('/:id', getUserById);
-router.post('/', createUser);
+router.get('/', authenticateHandler, getUsers);
+router.get('/:id', authenticateHandler, getUserById);
+router.post('/', authenticateHandler, createUser);
 router.patch('/:id', authenticateHandler, updateUser);
 
 export default router;

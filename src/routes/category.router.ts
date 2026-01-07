@@ -4,8 +4,8 @@ import { createCategory, getCategories, getCategory, updateCategory } from '@/co
 
 const router = Router();
 
-router.get('/', authenticateHandler, getCategories);
-router.get('/:id', authenticateHandler, getCategory);
+router.get('/', getCategories);
+router.get('/:id', getCategory);
 router.post('/', authenticateHandler, createCategory);
 router.patch('/:id', authenticateHandler, updateCategory);
 

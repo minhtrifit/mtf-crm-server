@@ -151,10 +151,10 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { name, imageUrl, isActive } = req.body;
+    const { name, slug, imageUrl, isActive } = req.body;
 
     // 1. Validate: At least one field
-    if (name === undefined && imageUrl === undefined && isActive === undefined) {
+    if (name === undefined && slug !== undefined && imageUrl === undefined && isActive === undefined) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: 'At least one field is required'
@@ -176,7 +176,48 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     // 3. Build data update
     const data: any = {};
 
-    if (name !== undefined) data.name = name;
+    if (name !== undefined) {
+      // Find category with name
+      const existedCategory = await prisma.category.findFirst({
+        where: {
+          name: name,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedCategory) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Category name is existed'
+        });
+      }
+
+      data.name = name;
+    }
+    if (slug !== undefined) {
+      // Find category with slug
+      const existedCategory = await prisma.category.findFirst({
+        where: {
+          slug: slug,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedCategory) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: 'Category slug is existed'
+        });
+      }
+
+      data.slug = slug;
+    }
     if (imageUrl !== undefined) data.imageUrl = imageUrl;
     if (isActive !== undefined) data.isActive = isActive;
 
