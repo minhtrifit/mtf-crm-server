@@ -522,3 +522,93 @@ npm run prisma:seed
   "categoryId": "c529266e-7706-4809-b784-cfcb81596e20"
 }
 ```
+
+> **Order**
+
+- Get order by id
+
+`[GET]`: `http://localhost:5000/api/order/detail/:id`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+- Create new COD order
+
+`[POST]`: `http://localhost:5000/api/order/create-cod-order`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+### Request Body
+
+| Query             | Type         | Required |
+| ----------------- | ------------ | -------- |
+| `userId`          | string       | ✅       |
+| `deliveryAddress` | string       | ✅       |
+| `note`            | string       | ❌       |
+| `items`           | array object | ✅       |
+| `items.productId` | string       | ✅       |
+| `items.quantity`  | number       | ✅       |
+
+```json
+{
+  "userId": "d14480c0-ed03-4e5d-86a1-53072605e78b",
+  "deliveryAddress": "Hồ Chí Minh",
+  "note": "Giao hàng giờ hành chính",
+  "items": [
+    {
+      "productId": "06cc137f-7691-433b-b818-2715ada2ea77",
+      "quantity": 2
+    },
+    {
+      "productId": "2b8ca681-9d91-42e3-9d78-7ec34c414145",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+- Create new VNPAY order
+
+`[POST]`: `http://localhost:5000/api/order/create-vnpay-order`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+### Request Body
+
+| Query             | Type         | Required |
+| ----------------- | ------------ | -------- |
+| `userId`          | string       | ✅       |
+| `deliveryAddress` | string       | ✅       |
+| `note`            | string       | ❌       |
+| `items`           | array object | ✅       |
+| `items.productId` | string       | ✅       |
+| `items.quantity`  | number       | ✅       |
+
+```json
+{
+  "userId": "d14480c0-ed03-4e5d-86a1-53072605e78b",
+  "deliveryAddress": "Hồ Chí Minh",
+  "note": "Giao hàng giờ hành chính",
+  "items": [
+    {
+      "productId": "06cc137f-7691-433b-b818-2715ada2ea77",
+      "quantity": 2
+    },
+    {
+      "productId": "2b8ca681-9d91-42e3-9d78-7ec34c414145",
+      "quantity": 1
+    }
+  ]
+}
+```

@@ -65,6 +65,8 @@
     "is_required": "Order ID is required",
     "not_found": "Order not found",
     "create_successfully": "Create order successfully",
-    "update_successfully": "Update order successfully"
+    "create_failed": "Create order failed",
+    "update_successfully": "Update order successfully",
+    "order_payment_id": "Payment for order {{ orderId }}"
   }
 }

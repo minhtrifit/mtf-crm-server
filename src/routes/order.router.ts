@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { getOrder, createCodOrder } from '@/controllers/order.controller';
+import { authenticateHandler } from '@/middlewares/auth';
+import { getOrder, createCodOrder, handleVNPayPayment, handleVNpayReturn } from '@/controllers/order.controller';
 
 const router = Router();
 
-router.get('/:id', getOrder);
-router.post('/cod-order', createCodOrder);
+router.get('/detail/:id', authenticateHandler, getOrder);
+router.post('/create-cod-order', authenticateHandler, createCodOrder);
+router.post('/create-vnpay-order', authenticateHandler, handleVNPayPayment);
+router.get('/result/vnpay', handleVNpayReturn);
 
 export default router;

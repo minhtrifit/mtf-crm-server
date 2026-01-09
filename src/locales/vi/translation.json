@@ -65,6 +65,8 @@
     "is_required": "Vui lòng chọn mã đơn hàng",
     "not_found": "Không tìm thấy đơn hàng",
     "create_successfully": "Tạo đơn hàng thành công",
-    "update_successfully": "Cập nhật đơn hàng thành công"
+    "create_failed": "Tạo đơn hàng không thành công",
+    "update_successfully": "Cập nhật đơn hàng thành công",
+    "order_payment_id": "Thanh toán đơn hàng {{ orderId }}"
   }
 }
