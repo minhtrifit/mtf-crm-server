@@ -14,6 +14,7 @@ export const CreateSchema = Joi.object({
 
 export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 10, 100);
 
@@ -56,7 +57,8 @@ export const getCustomers = async (req: Request, res: Response, next: NextFuncti
       data: {
         data,
         paging
-      }
+      },
+      message: t('customer.get_list_successfully')
     });
   } catch (error) {
     next(error);
@@ -65,13 +67,14 @@ export const getCustomers = async (req: Request, res: Response, next: NextFuncti
 
 export const getCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const id = req.params.id;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Customer ID is required'
+        message: t('customer.is_required')
       });
     }
 
@@ -84,14 +87,14 @@ export const getCustomer = async (req: Request, res: Response, next: NextFunctio
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'Customer not found'
+        message: t('customer.not_found')
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: customer,
-      message: 'Get customer successfully'
+      message: t('customer.get_detail_successfully')
     });
   } catch (error) {
     next(error);
@@ -100,6 +103,7 @@ export const getCustomer = async (req: Request, res: Response, next: NextFunctio
 
 export const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
@@ -127,7 +131,7 @@ export const createCustomer = async (req: Request, res: Response, next: NextFunc
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Customer phone is existed'
+        message: t('customer.phone_existed')
       });
     }
 
@@ -145,7 +149,7 @@ export const createCustomer = async (req: Request, res: Response, next: NextFunc
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: customer,
-      message: 'Create customer successfully'
+      message: t('customer.create_successfully')
     });
   } catch (error) {
     next(error);
@@ -154,6 +158,7 @@ export const createCustomer = async (req: Request, res: Response, next: NextFunc
 
 export const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { id } = req.params;
     const { fullName, phone, email, address } = req.body;
 
@@ -161,7 +166,7 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
     if (fullName === undefined && phone === undefined && email === undefined) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: 'At least one field is required'
+        message: t('at_least_one_field_required')
       });
     }
 
@@ -173,7 +178,7 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
     if (!customer) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: 'Customer not found'
+        message: t('customer.not_found')
       });
     }
 
@@ -196,7 +201,7 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Customer phone is existed'
+          message: t('customer.phone_existed')
         });
       }
 
@@ -223,7 +228,7 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedCustomer,
-      message: 'Update customer successfully'
+      message: t('customer.update_successfully')
     });
   } catch (error) {
     next(error);

@@ -3,6 +3,7 @@ import { HTTP_STATUS } from '@/constants/http-status-code';
 
 export const controllerHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const id = req.params.id;
     const { name } = req.body;
 

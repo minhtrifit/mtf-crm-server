@@ -21,7 +21,40 @@
     "get_detail_successfully": "Lấy thông tin người dùng thành công",
     "user_id_not_found": "Không tìm thấy ID người dùng",
     "user_email_existed": "Email đã tồn tại",
+    "user_phone_existed": "Số điện thoại đã tồn tại",
     "user_not_found": "Người dùng không tồn tại",
+    "create_successfully": "Thêm mới người dùng thành công",
+    "update_successfully": "Cập nhật người dùng thành công"
+  },
+  "category": {
+    "get_list_successfully": "Lấy danh sách danh mục thành công",
+    "get_detail_successfully": "Lấy thông tin danh mục thành công",
+    "id_required": "Vui lòng chọn mã danh mục",
+    "not_found": "Không tìm thấy danh mục",
+    "is_existed": "Danh mục đã tồn tại",
+    "name_existed": "Tên danh mục đã tồn tại",
+    "slug_existed": "Slug danh mục đã tồn tại",
+    "create_successfully": "Thêm mới danh mục thành công",
+    "update_successfully": "Cập nhật danh mục thành công"
+  },
+  "product": {
+    "get_list_successfully": "Lấy danh sách sản phẩm thành công",
+    "get_detail_successfully": "Lấy thông tin sản phẩm thành công",
+    "id_required": "Vui lòng chọn mã sản phẩm",
+    "not_found": "Không tìm thấy sản phẩm",
+    "is_existed": "Sản phẩm đã tồn tại",
+    "name_existed": "Tên sản phẩm đã tồn tại",
+    "slug_existed": "Slug sản phẩm đã tồn tại",
+    "sku_existed": "Sku sản phẩm đã tồn tại",
+    "create_successfully": "Thêm mới sản phẩm thành công",
+    "update_successfully": "Cập nhật sản phẩm thành công"
+  },
+  "customer": {
+    "get_list_successfully": "Lấy danh sách người dùng thành công",
+    "get_detail_successfully": "Lấy thông tin người dùng thành công",
+    "is_required": "Vui lòng chọn mã người dùng",
+    "not_found": "Không tìm thấy người dùng",
+    "phone_existed": "Số điện thoại người dùng đã tồn tại",
     "create_successfully": "Thêm mới người dùng thành công",
     "update_successfully": "Cập nhật người dùng thành công"
   }

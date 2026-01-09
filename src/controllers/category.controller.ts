@@ -13,6 +13,7 @@ export const CreateSchema = Joi.object({
 
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 10, 100);
 
@@ -51,7 +52,8 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
       data: {
         data,
         paging
-      }
+      },
+      message: t('category.get_list_successfully')
     });
   } catch (error) {
     next(error);
@@ -60,13 +62,14 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const id = req.params.id;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Category ID is required'
+        message: t('category.id_required')
       });
     }
 
@@ -79,14 +82,14 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'Category not found'
+        message: t('category.not_found')
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: category,
-      message: 'Get category successfully'
+      message: t('category.get_detail_successfully')
     });
   } catch (error) {
     next(error);
@@ -95,6 +98,7 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
 
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
@@ -124,7 +128,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Category is existed'
+        message: t('category.is_existed')
       });
     }
 
@@ -141,7 +145,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: category,
-      message: 'Create category successfully'
+      message: t('category.create_successfully')
     });
   } catch (error) {
     next(error);
@@ -150,6 +154,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
 export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { id } = req.params;
     const { name, slug, imageUrl, isActive } = req.body;
 
@@ -157,7 +162,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     if (name === undefined && slug !== undefined && imageUrl === undefined && isActive === undefined) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: 'At least one field is required'
+        message: t('at_least_one_field_required')
       });
     }
 
@@ -169,7 +174,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     if (!category) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: 'Category not found'
+        message: t('category.not_found')
       });
     }
 
@@ -191,7 +196,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Category name is existed'
+          message: t('category.name_existed')
         });
       }
 
@@ -212,7 +217,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Category slug is existed'
+          message: t('category.slug_existed')
         });
       }
 
@@ -238,7 +243,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedCategory,
-      message: 'Update category successfully'
+      message: t('category.update_successfully')
     });
   } catch (error) {
     next(error);

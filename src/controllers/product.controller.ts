@@ -20,6 +20,7 @@ export const CreateSchema = Joi.object({
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 10, 100);
 
@@ -81,7 +82,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       data: {
         data,
         paging
-      }
+      },
+      message: t('product.get_list_successfully')
     });
   } catch (error) {
     next(error);
@@ -90,13 +92,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const id = req.params.id;
 
     if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Product ID is required'
+        message: t('product.id_required')
       });
     }
 
@@ -120,14 +123,14 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         data: null,
-        message: 'Product not found'
+        message: t('product.not_found')
       });
     }
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: product,
-      message: 'Get product successfully'
+      message: t('product.get_detail_successfully')
     });
   } catch (error) {
     next(error);
@@ -136,6 +139,7 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
@@ -165,7 +169,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Product is existed'
+        message: t('product.is_existed')
       });
     }
 
@@ -178,7 +182,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Category not found'
+        message: t('category.not_found')
       });
     }
 
@@ -200,7 +204,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: product,
-      message: 'Create product successfully'
+      message: t('product.create_successfully')
     });
   } catch (error) {
     next(error);
@@ -209,6 +213,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
 export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const { id } = req.params;
     const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = req.body;
 
@@ -225,7 +230,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     ) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: 'At least one field is required'
+        message: t('at_least_one_field_required')
       });
     }
 
@@ -237,7 +242,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     if (!product) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: 'Product not found'
+        message: t('product.not_found')
       });
     }
 
@@ -259,7 +264,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Product name is existed'
+          message: t('product.name_existed')
         });
       }
 
@@ -280,7 +285,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Product slug is existed'
+          message: t('product.slug_existed')
         });
       }
 
@@ -301,7 +306,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Product sku is existed'
+          message: t('product.sku_existed')
         });
       }
 
@@ -320,7 +325,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           data: null,
-          message: 'Category not found'
+          message: t('category.not_found')
         });
       }
 
@@ -357,7 +362,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedProduct,
-      message: 'Update product successfully'
+      message: t('product.update_successfully')
     });
   } catch (error) {
     next(error);

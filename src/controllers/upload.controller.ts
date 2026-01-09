@@ -3,6 +3,8 @@ import { HTTP_STATUS } from '@/constants/http-status-code';
 
 export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
+
     const { id } = req.params;
     const { name } = req.body;
     const file = req.file;
@@ -10,7 +12,7 @@ export const uploadFile = async (req: Request, res: Response, next: NextFunction
     if (!file) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: 'File is required'
+        message: t('upload.file_required')
       });
     }
 
@@ -30,7 +32,7 @@ export const uploadFile = async (req: Request, res: Response, next: NextFunction
           url: fileUrl
         }
       },
-      message: 'Upload file successfully'
+      message: t('upload.upload_file_successfully')
     });
   } catch (error) {
     next(error);
@@ -39,13 +41,14 @@ export const uploadFile = async (req: Request, res: Response, next: NextFunction
 
 export const uploadFiles = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { t } = req;
     const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
-        message: 'Files are required'
+        message: t('upload.files_required')
       });
     }
 
@@ -60,7 +63,7 @@ export const uploadFiles = async (req: Request, res: Response, next: NextFunctio
         mimeType: file.mimetype,
         url: `${baseUrl}/uploads/${file.filename}`
       })),
-      message: 'Upload files successfully'
+      message: t('upload.upload_files_successfully')
     });
   } catch (error) {
     next(error);

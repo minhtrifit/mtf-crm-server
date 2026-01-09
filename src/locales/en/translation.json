@@ -21,8 +21,41 @@
     "get_detail_successfully": "Get user successfully",
     "user_id_not_found": "User ID not found",
     "user_email_existed": "User email is existed",
+    "user_phone_existed": "User phone is existed",
     "user_not_found": "User not found",
-    "create_successfully": "Create successfully",
-    "update_successfully": "Update successfully"
+    "create_successfully": "Create user successfully",
+    "update_successfully": "Update user successfully"
+  },
+  "category": {
+    "get_list_successfully": "Get categories successfully",
+    "get_detail_successfully": "Get category successfully",
+    "id_required": "Category ID is required",
+    "not_found": "Category not found",
+    "is_existed": "Category is existed",
+    "name_existed": "Category name is existed",
+    "slug_existed": "Category slug is existed",
+    "create_successfully": "Create category successfully",
+    "update_successfully": "Update category successfully"
+  },
+  "product": {
+    "get_list_successfully": "Get products successfully",
+    "get_detail_successfully": "Get product successfully",
+    "id_required": "Product ID is required",
+    "not_found": "Product not found",
+    "is_existed": "Product is existed",
+    "name_existed": "Product name is existed",
+    "slug_existed": "Product slug is existed",
+    "sku_existed": "Product sku is existed",
+    "create_successfully": "Create product successfully",
+    "update_successfully": "Update product successfully"
+  },
+  "customer": {
+    "get_list_successfully": "Get customers successfully",
+    "get_detail_successfully": "Get customer successfully",
+    "is_required": "Customer ID is required",
+    "not_found": "Customer not found",
+    "phone_existed": "Customer phone is existed",
+    "create_successfully": "Create customer successfully",
+    "update_successfully": "Update customer successfully"
   }
 }
