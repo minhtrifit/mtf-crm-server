@@ -394,6 +394,14 @@ export const handleVNpayReturn = async (req: Request, res: Response, next: NextF
 
     console.log('[VNP Params]', vnpParams);
 
+    if (Object.keys(vnpParams).length === 0) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('order.payment_not_found')
+      });
+    }
+
     const orderId = vnpParams.vnp_TxnRef;
     const vnpResponseCode = vnpParams.vnp_ResponseCode;
 

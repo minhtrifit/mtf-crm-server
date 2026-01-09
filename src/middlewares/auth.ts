@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '@/libs/auth';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 
+// Middleware xác thực
 export const authenticateHandler = (req: Request, res: Response, next: NextFunction) => {
   const { t } = req;
 
@@ -23,3 +24,23 @@ export const authenticateHandler = (req: Request, res: Response, next: NextFunct
 
   next();
 };
+
+// Middleware phân quyền (dùng sau xác thực)
+export const authorizeHandler =
+  (...allowedRoles: string[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const { t } = req;
+    const user = req.user; // req.user phải được set bởi middleware authenticate trước
+
+    if (!user) {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({ message: t('auth.no_permission') });
+    }
+
+    const hasRole = allowedRoles.includes(user.role);
+
+    if (!hasRole) {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({ message: t('auth.no_permission') });
+    }
+
+    next();
+  };

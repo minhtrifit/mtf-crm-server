@@ -8,7 +8,8 @@
     "user_email_existed": "Email đã tồn tại",
     "user_not_found": "Người dùng không tồn tại",
     "email_password_required": "Vui lòng nhập email & password",
-    "email_password_not_match": "Email hoặc tài khoản không đúng"
+    "email_password_not_match": "Email hoặc tài khoản không đúng",
+    "no_permission": "Không có quyền truy cập"
   },
   "upload": {
     "file_required": "Vui lòng chọn file",
@@ -67,6 +68,7 @@
     "create_successfully": "Tạo đơn hàng thành công",
     "create_failed": "Tạo đơn hàng không thành công",
     "update_successfully": "Cập nhật đơn hàng thành công",
-    "order_payment_id": "Thanh toán đơn hàng {{ orderId }}"
+    "order_payment_id": "Thanh toán đơn hàng {{ orderId }}",
+    "payment_not_found": "Không tìm thấy thông tin thanh toán"
   }
 }
