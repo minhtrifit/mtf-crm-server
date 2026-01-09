@@ -24,6 +24,14 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DeliveryStatus {
+  ORDERED        // đã đặt hàng
+  CONFIRMED      // đã xác nhận đơn hàng
+  PREPARING      // đang chuẩn bị hàng
+  SHIPPING       // đang vận chuyển
+  DELIVERED      // giao hàng thành công
+}
+
 enum PaymentMethod {
   COD
   VNPAY
@@ -92,10 +100,13 @@ model Product {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  orderCode   String      @unique
-  totalAmount Float
-  status      OrderStatus @default(PENDING)
+  id                String      @id @default(uuid())
+  orderCode         String      @unique
+  totalAmount       Float
+  status            OrderStatus @default(PENDING)
+  deliveryAddress   String
+  note              String?
+  deliveryStatus    DeliveryStatus @default(ORDERED)
 
   // Website order
   userId      String?

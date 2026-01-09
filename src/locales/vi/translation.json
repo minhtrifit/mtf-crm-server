@@ -57,5 +57,14 @@
     "phone_existed": "Số điện thoại người dùng đã tồn tại",
     "create_successfully": "Thêm mới người dùng thành công",
     "update_successfully": "Cập nhật người dùng thành công"
+  },
+  "order": {
+    "get_list_successfully": "Lấy danh sách đơn hàng thành công",
+    "get_detail_successfully": "Lấy thông tin đơn hàng thành công",
+    "product_id_not_found": "Không tìm thấy sản phẩm với mã {{ productId }}",
+    "is_required": "Vui lòng chọn mã đơn hàng",
+    "not_found": "Không tìm thấy đơn hàng",
+    "create_successfully": "Tạo đơn hàng thành công",
+    "update_successfully": "Cập nhật đơn hàng thành công"
   }
 }
