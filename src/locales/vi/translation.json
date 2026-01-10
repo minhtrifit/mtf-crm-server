@@ -1,5 +1,6 @@
 {
   "at_least_one_field_required": "Yêu cầu tối thiểu 1 trường dữ liệu",
+  "invalid_payload": "Thông tin không hợp lệ",
   "auth": {
     "register_success": "Đăng ký thành công",
     "login_success": "Đăng nhập thành công",
@@ -69,6 +70,7 @@
     "create_failed": "Tạo đơn hàng không thành công",
     "update_successfully": "Cập nhật đơn hàng thành công",
     "order_payment_id": "Thanh toán đơn hàng {{ orderId }}",
-    "payment_not_found": "Không tìm thấy thông tin thanh toán"
+    "payment_not_found": "Không tìm thấy thông tin thanh toán",
+    "get_order_payment_successfully": "Lấy thông tin thanh toán đơn hàng thành công"
   }
 }

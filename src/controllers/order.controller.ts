@@ -15,7 +15,7 @@ export const CreateSchema = Joi.object({
   userId: Joi.string().uuid().required(),
 
   deliveryAddress: Joi.string().required(),
-  note: Joi.string().allow('', null),
+  note: Joi.string().allow(''),
 
   items: Joi.array()
     .items(
@@ -26,6 +26,19 @@ export const CreateSchema = Joi.object({
     )
     .min(1)
     .required()
+});
+
+export const UpdateSchema = Joi.object({
+  note: Joi.string().allow('').optional(),
+  deliveryAddress: Joi.string().allow('').optional(),
+
+  status: Joi.string()
+    .valid(...orderStatusValues)
+    .optional(),
+
+  deliveryStatus: Joi.string()
+    .valid(...deliveryStatusValues)
+    .optional()
 });
 
 export const getOrder = async (req: Request, res: Response, next: NextFunction) => {
@@ -90,6 +103,14 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
     });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
 
     if (error) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -239,7 +260,7 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const handleVNPayPayment = async (req: Request, res: Response, next: NextFunction) => {
+export const createVNPayOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
 
@@ -253,6 +274,14 @@ export const handleVNPayPayment = async (req: Request, res: Response, next: Next
       abortEarly: false, // trả về tất cả lỗi
       allowUnknown: false // không cho field dư
     });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
 
     if (error) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -481,6 +510,81 @@ export const handleVNpayReturn = async (req: Request, res: Response, next: NextF
     return res.redirect(
       `${clientUrl}/payment?order_id=${vnpParams.vnp_TxnRef}&method=${PaymentMethod.VNPAY}&vnpResponseCode=${vnpResponseCode}`
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('order.is_required')
+      });
+    }
+
+    const { error, value } = UpdateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    // Find Order with ID
+    const order = await prisma.order.findUnique({
+      where: { id: id }
+    });
+
+    if (!order) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: t('order.not_found')
+      });
+    }
+
+    const { note, deliveryAddress, status, deliveryStatus } = value;
+
+    // Build data update
+    const data: any = {};
+
+    if (note !== undefined) data.note = note;
+    if (deliveryAddress !== undefined) data.deliveryAddress = deliveryAddress;
+    if (status !== undefined) data.status = status;
+    if (deliveryStatus !== undefined) data.deliveryStatus = deliveryStatus;
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data
+    });
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: updatedOrder,
+      message: t('order.update_successfully')
+    });
   } catch (error) {
     next(error);
   }

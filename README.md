@@ -612,3 +612,31 @@ npm run prisma:seed
   ]
 }
 ```
+
+- Update order
+
+`[PATCH]`: `http://localhost:5000/api/order/update-order/:id`
+
+### Request Header
+
+| Key             | Type               | Required |
+| --------------- | ------------------ | -------- |
+| `Authorization` | Bearer token-value | ✅       |
+
+### Request Body
+
+| Query             | Type                                                                 | Required |
+| ----------------- | -------------------------------------------------------------------- | -------- |
+| `note`            | string                                                               | ❌       |
+| `deliveryAddress` | string                                                               | ❌       |
+| `status`          | `PENDING` or `PAID` or `CANCELLED`                                   | ❌       |
+| `deliveryStatus`  | `ORDERED` or `CONFIRMED` or `PREPARING` or `SHIPPING` or `DELIVERED` | ❌       |
+
+```json
+{
+  "note": "Giao buổi sáng",
+  "deliveryAddress": "HN",
+  "status": "PENDING",
+  "deliveryStatus": "ORDERED"
+}
+```
