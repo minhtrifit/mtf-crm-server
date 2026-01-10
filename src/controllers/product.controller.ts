@@ -145,6 +145,14 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       allowUnknown: false // không cho field dư
     });
 
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
     if (error) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
