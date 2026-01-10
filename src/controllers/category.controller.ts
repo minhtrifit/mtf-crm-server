@@ -11,6 +11,13 @@ export const CreateSchema = Joi.object({
   imageUrl: Joi.string().required()
 });
 
+export const UpdateSchema = Joi.object({
+  name: Joi.string().min(1).optional(),
+  slug: Joi.string().min(1).optional(),
+  imageUrl: Joi.string().allow('').optional(),
+  isActive: Joi.boolean().optional()
+});
+
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
@@ -164,17 +171,16 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
     const { id } = req.params;
-    const { name, slug, imageUrl, isActive } = req.body;
 
-    // 1. Validate: At least one field
-    if (name === undefined && slug !== undefined && imageUrl === undefined && isActive === undefined) {
+    if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: t('at_least_one_field_required')
+        data: null,
+        message: t('category.id_required')
       });
     }
 
-    // 2. Check category by ID
+    // Check category by ID
     const category = await prisma.category.findUnique({
       where: { id }
     });
@@ -186,7 +192,33 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    // 3. Build data update
+    const { error, value } = UpdateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { name, slug, imageUrl, isActive } = value;
+
+    // Build data update
     const data: any = {};
 
     if (name !== undefined) {
@@ -234,7 +266,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
     if (imageUrl !== undefined) data.imageUrl = imageUrl;
     if (isActive !== undefined) data.isActive = isActive;
 
-    // 4. Update
+    // Update
     const updatedCategory = await prisma.category.update({
       where: { id },
       data,

@@ -180,7 +180,6 @@ npm run prisma:seed
 | ---------- | ----------------- | -------- |
 | `email`    | string            | ❌       |
 | `fullName` | string            | ❌       |
-| `password` | string            | ❌       |
 | `phone`    | string            | ❌       |
 | `address`  | string            | ❌       |
 | `role`     | `ADMIN` or `USER` | ❌       |
@@ -189,7 +188,6 @@ npm run prisma:seed
 {
   "email": "tri@example.com",
   "fullName": "minhtrifit",
-  "password": "123456",
   "phone": "123456789",
   "address": "HCM",
   "role": "USER" | "ADMIN"
@@ -331,17 +329,19 @@ npm run prisma:seed
 
 ### Request Body
 
-| Query      | Type   | Required |
-| ---------- | ------ | -------- |
-| `name`     | string | ❌       |
-| `slug`     | string | ❌       |
-| `imageUrl` | string | ❌       |
+| Query      | Type    | Required |
+| ---------- | ------- | -------- |
+| `name`     | string  | ❌       |
+| `slug`     | string  | ❌       |
+| `imageUrl` | string  | ❌       |
+| `isActive` | boolean | ❌       |
 
 ```json
 {
   "name": "Category 1",
   "slug": "category-1",
-  "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg"
+  "imageUrl": "http://localhost:5000/uploads/1767696821488-255593947.jpg",
+  "isActive": false
 }
 ```
 

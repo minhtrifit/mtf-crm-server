@@ -12,6 +12,13 @@ export const CreateSchema = Joi.object({
   address: Joi.string().required()
 });
 
+export const UpdateSchema = Joi.object({
+  fullName: Joi.string().min(1).optional(),
+  phone: Joi.string().min(1).optional(),
+  email: Joi.string().allow('').optional(),
+  address: Joi.string().min(1).optional()
+});
+
 export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
@@ -168,17 +175,16 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
     const { id } = req.params;
-    const { fullName, phone, email, address } = req.body;
 
-    // 1. Validate: At least one field
-    if (fullName === undefined && phone === undefined && email === undefined) {
+    if (!id) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: t('at_least_one_field_required')
+        data: null,
+        message: t('category.id_required')
       });
     }
 
-    // 2. Check customer by ID
+    // Check customer by ID
     const customer = await prisma.customer.findUnique({
       where: { id }
     });
@@ -190,7 +196,33 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    // 3. Build data update
+    const { error, value } = UpdateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { fullName, phone, email, address } = value;
+
+    // Build data update
     const data: any = {};
 
     if (fullName !== undefined) data.fullName = fullName;
@@ -218,7 +250,7 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
     if (email !== undefined) data.email = email;
     if (address !== undefined) data.address = address;
 
-    // 4. Update
+    // Update
     const updatedCustomer = await prisma.customer.update({
       where: { id },
       data,

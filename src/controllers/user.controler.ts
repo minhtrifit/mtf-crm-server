@@ -19,6 +19,16 @@ export const CreateSchema = Joi.object({
     .optional()
 });
 
+export const UpdateSchema = Joi.object({
+  email: Joi.string().min(1).optional(),
+  fullName: Joi.string().min(1).optional(),
+  phone: Joi.string().allow('').optional(),
+  address: Joi.string().allow('').optional(),
+  role: Joi.string()
+    .valid(...roleValues)
+    .optional()
+});
+
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
@@ -201,17 +211,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
   try {
     const { t } = req;
     const { id } = req.params;
-    const { email, fullName, password, phone, address, isActive } = req.body;
 
-    // 1. Validate: At least one field
-    if (fullName === undefined && email === undefined && password === undefined && isActive === undefined) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: t('at_least_one_field_required')
-      });
-    }
-
-    // 2. Check user by ID
+    // Check user by ID
     const user = await prisma.user.findUnique({
       where: { id }
     });
@@ -223,7 +224,33 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       });
     }
 
-    // 3. Build data update
+    const { error, value } = UpdateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { email, fullName, phone, address, isActive } = value;
+
+    // Build data update
     const data: any = {};
 
     if (fullName !== undefined) data.fullName = fullName;
@@ -273,12 +300,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     if (address !== undefined) data.address = address;
     if (isActive !== undefined) data.isActive = isActive;
 
-    if (password !== undefined) {
-      const hashedPassword = await hashPassword(password);
-      data.password = hashedPassword;
-    }
-
-    // 4. Update
+    // Update
     const updatedUser = await prisma.user.update({
       where: { id },
       data,

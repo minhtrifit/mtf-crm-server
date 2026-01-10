@@ -18,6 +18,20 @@ export const CreateSchema = Joi.object({
   categoryId: Joi.string().required()
 });
 
+export const UpdateSchema = Joi.object({
+  name: Joi.string().min(1).optional(),
+  slug: Joi.string()
+    .pattern(/^[a-z0-9-]+$/)
+    .min(1)
+    .optional(),
+  sku: Joi.string().min(1).optional(),
+  price: Joi.number().positive().optional(),
+  imagesUrl: Joi.array().items(Joi.string().uri()).min(1).optional(),
+  description: Joi.string().allow('').optional(),
+  isActive: Joi.boolean().optional(),
+  categoryId: Joi.string().min(1).optional()
+});
+
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
@@ -223,26 +237,8 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const { t } = req;
     const { id } = req.params;
-    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = req.body;
 
-    // 1. Validate: At least one field
-    if (
-      name === undefined &&
-      slug === undefined &&
-      sku === undefined &&
-      price === undefined &&
-      imagesUrl === undefined &&
-      description === undefined &&
-      isActive === undefined &&
-      categoryId === undefined
-    ) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: t('at_least_one_field_required')
-      });
-    }
-
-    // 2. Check product by ID
+    // Check product by ID
     const product = await prisma.product.findUnique({
       where: { id }
     });
@@ -254,7 +250,33 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    // 3. Build data update
+    const { error, value } = UpdateSchema.validate(req.body, {
+      abortEarly: false, // trả về tất cả lỗi
+      allowUnknown: false // không cho field dư
+    });
+
+    if (!value) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('invalid_payload')
+      });
+    }
+
+    if (error) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: error.details.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = value;
+
+    // Build data update
     const data: any = {};
 
     if (name !== undefined) {
@@ -341,7 +363,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     }
     if (isActive !== undefined) data.isActive = isActive;
 
-    // 4. Update
+    // Update
     const updatedProduct = await prisma.product.update({
       where: { id },
       data,
