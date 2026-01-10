@@ -131,3 +131,38 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     next(error);
   }
 };
+
+export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t, user } = req;
+
+    if (!user) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('auth.user_not_found')
+      });
+    }
+
+    // Find User by ID
+    const profile = await prisma.user.findUnique({
+      where: { id: user.userId }
+    });
+
+    if (!profile) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: t('user.user_not_found')
+      });
+    }
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: profile,
+      message: t('user.get_detail_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
