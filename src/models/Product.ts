@@ -3,6 +3,7 @@ export interface ProductBase {
   slug: string;
   sku: string;
   price: number;
+  stock: number;
   imagesUrl: string[];
   description: string;
   isActive: boolean;

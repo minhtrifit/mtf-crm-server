@@ -12,9 +12,9 @@ export const CreateSchema = Joi.object({
     .required(),
   sku: Joi.string().required(),
   price: Joi.number().positive().required(),
+  stock: Joi.number().positive().required(),
   imagesUrl: Joi.array().items(Joi.string().uri()).min(1).required(),
   description: Joi.string().allow('').required(),
-  isActive: Joi.boolean().required(),
   categoryId: Joi.string().required()
 });
 
@@ -26,6 +26,7 @@ export const UpdateSchema = Joi.object({
     .optional(),
   sku: Joi.string().min(1).optional(),
   price: Joi.number().positive().optional(),
+  stock: Joi.number().positive().optional(),
   imagesUrl: Joi.array().items(Joi.string().uri()).min(1).optional(),
   description: Joi.string().allow('').optional(),
   isActive: Joi.boolean().optional(),
@@ -41,9 +42,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const q = (req.query.q as string)?.trim();
     const categoryId = (req.query.categoryId as string)?.trim();
     const categorySlug = (req.query.categorySlug as string)?.trim();
-    const isActive = req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined;
+    let isActive: boolean | undefined = undefined;
 
     const skip = (page - 1) * limit;
+
+    if (req.query.isActive === 'true') {
+      isActive = true;
+    } else if (req.query.isActive === 'false') {
+      isActive = false;
+    }
 
     // Build where condition
     const where: any = {
@@ -68,7 +75,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         include: {
           category: {
             select: {
@@ -178,7 +185,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = value;
+    const { name, slug, sku, price, stock, imagesUrl, description, categoryId } = value;
 
     // Find Product with Name
     const existedProduct = await prisma.product.findFirst({
@@ -213,9 +220,10 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       slug: slug,
       sku: sku,
       price: price,
+      stock: stock,
       imagesUrl: imagesUrl,
       description: description,
-      isActive: isActive,
+      isActive: true,
       categoryId: categoryId
     };
 
@@ -274,7 +282,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    const { name, slug, sku, price, imagesUrl, description, isActive, categoryId } = value;
+    const { name, slug, sku, price, stock, imagesUrl, description, isActive, categoryId } = value;
 
     // Build data update
     const data: any = {};
@@ -343,6 +351,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       data.sku = sku;
     }
     if (price !== undefined) data.price = price;
+    if (stock !== undefined) data.stock = stock;
     if (imagesUrl !== undefined) data.imagesUrl = imagesUrl;
     if (description !== undefined) data.description = description;
     if (categoryId !== undefined) {
@@ -372,6 +381,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         name: true,
         sku: true,
         price: true,
+        stock: true,
         description: true,
         imagesUrl: true,
         category: {

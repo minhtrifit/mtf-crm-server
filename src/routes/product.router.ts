@@ -6,8 +6,8 @@ import { getProducts, getProduct, createProduct, updateProduct } from '@/control
 const router = Router();
 
 router.get('/', getProducts);
-router.get('/:id', getProduct);
+router.get('/detail/:id', getProduct);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), createProduct);
-router.patch('/:id', authenticateHandler, authorizeHandler(Role.ADMIN), updateProduct);
+router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), updateProduct);
 
 export default router;
