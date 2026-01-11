@@ -25,15 +25,21 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
     const limit = Math.min(Number(req.query.limit) || 10, 100);
 
     const q = (req.query.q as string)?.trim();
-    const isActive = req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined;
+    let isActive: boolean | undefined = undefined;
 
     const skip = (page - 1) * limit;
+
+    if (req.query.isActive === 'true') {
+      isActive = true;
+    } else if (req.query.isActive === 'false') {
+      isActive = false;
+    }
 
     // Build where condition
     const where: any = {
       ...(isActive !== undefined && { isActive }),
       ...(q && {
-        OR: [{ name: { contains: q, mode: 'insensitive' } }]
+        OR: [{ name: { contains: q, mode: 'insensitive' } }, { slug: { contains: q, mode: 'insensitive' } }]
       })
     };
 
@@ -42,7 +48,7 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
       }),
       prisma.category.count({ where })
     ]);
