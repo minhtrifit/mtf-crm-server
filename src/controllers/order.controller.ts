@@ -98,6 +98,7 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
     const clientUrl = process.env.CLIENT_URL!;
+    const clientCheckoutReturnPathname = process.env.CLIENT_CHECKOUT_RETURN_PATHNAME!;
 
     const { error, value } = CreateSchema.validate(req.body, {
       abortEarly: false, // trả về tất cả lỗi
@@ -251,7 +252,7 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
       success: true,
       data: {
         order,
-        redirect_payment_url: `${clientUrl}/payment?order_id=${order.id}&method=${PaymentMethod.COD}`
+        redirect_payment_url: `${clientUrl}/${clientCheckoutReturnPathname}&order_id=${order.id}&method=${PaymentMethod.COD}`
       },
       message: t('order.create_successfully')
     });
@@ -420,6 +421,7 @@ export const handleVNpayReturn = async (req: Request, res: Response, next: NextF
     const vnpParams = { ...req.query };
 
     const clientUrl = process.env.CLIENT_URL!;
+    const clientCheckoutReturnPathname = process.env.CLIENT_CHECKOUT_RETURN_PATHNAME!;
 
     console.log('[VNP Params]', vnpParams);
 
@@ -508,7 +510,7 @@ export const handleVNpayReturn = async (req: Request, res: Response, next: NextF
     }
 
     return res.redirect(
-      `${clientUrl}/payment?order_id=${vnpParams.vnp_TxnRef}&method=${PaymentMethod.VNPAY}&vnpResponseCode=${vnpResponseCode}`
+      `${clientUrl}/${clientCheckoutReturnPathname}&order_id=${vnpParams.vnp_TxnRef}&method=${PaymentMethod.VNPAY}&vnpResponseCode=${vnpResponseCode}`
     );
   } catch (error) {
     next(error);
