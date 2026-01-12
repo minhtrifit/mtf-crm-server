@@ -37,7 +37,8 @@
     "name_existed": "Category name is existed",
     "slug_existed": "Category slug is existed",
     "create_successfully": "Create category successfully",
-    "update_successfully": "Update category successfully"
+    "update_successfully": "Update category successfully",
+    "slug_required": "Slug is required"
   },
   "product": {
     "get_list_successfully": "Get products successfully",
@@ -49,7 +50,8 @@
     "slug_existed": "Product slug is existed",
     "sku_existed": "Product sku is existed",
     "create_successfully": "Create product successfully",
-    "update_successfully": "Update product successfully"
+    "update_successfully": "Update product successfully",
+    "slug_required": "Slug is required"
   },
   "customer": {
     "get_list_successfully": "Get customers successfully",

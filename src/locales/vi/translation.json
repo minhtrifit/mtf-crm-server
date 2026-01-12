@@ -37,7 +37,8 @@
     "name_existed": "Tên danh mục đã tồn tại",
     "slug_existed": "Slug danh mục đã tồn tại",
     "create_successfully": "Thêm mới danh mục thành công",
-    "update_successfully": "Cập nhật danh mục thành công"
+    "update_successfully": "Cập nhật danh mục thành công",
+    "slug_required": "Vui lòng chọn slug"
   },
   "product": {
     "get_list_successfully": "Lấy danh sách sản phẩm thành công",
@@ -49,7 +50,8 @@
     "slug_existed": "Slug sản phẩm đã tồn tại",
     "sku_existed": "Sku sản phẩm đã tồn tại",
     "create_successfully": "Thêm mới sản phẩm thành công",
-    "update_successfully": "Cập nhật sản phẩm thành công"
+    "update_successfully": "Cập nhật sản phẩm thành công",
+    "slug_required": "Vui lòng chọn slug"
   },
   "customer": {
     "get_list_successfully": "Lấy danh sách người dùng thành công",

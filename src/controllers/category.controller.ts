@@ -130,6 +130,42 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const getCategoryBySlug = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const slug = req.params.slug;
+
+    if (!slug) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('category.slug_required')
+      });
+    }
+
+    // Find Category with Slug
+    const category = await prisma.category.findUnique({
+      where: { slug: slug }
+    });
+
+    if (!category) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: t('category.not_found')
+      });
+    }
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: category,
+      message: t('category.get_detail_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

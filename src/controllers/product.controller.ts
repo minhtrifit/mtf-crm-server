@@ -111,6 +111,74 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const getShowcaseProductsByCategorySlug = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const categorySlug = req.params.slug;
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 10, 100);
+
+    const skip = (page - 1) * limit;
+
+    if (!categorySlug) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: t('product.slug_required')
+      });
+    }
+
+    // Build where condition
+    const where: any = {
+      ...(categorySlug && {
+        category: {
+          slug: categorySlug
+        }
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              imageUrl: true,
+              isActive: true
+            }
+          }
+        }
+      }),
+      prisma.product.count({ where })
+    ]);
+
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        data,
+        paging
+      },
+      message: t('product.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
