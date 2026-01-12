@@ -7,7 +7,8 @@
 1. [Required & Technical Stack](#required-technical-stack)
 2. [Config](#config)
 3. [Installation](#installation)
-4. [API List](#api-list)
+4. [Migrate database](#migrate-database)
+5. [API List](#api-list)
 
 ## 💻 Required & Technical Stack <a name="required-technical-stack"></a>
 
@@ -91,6 +92,24 @@ npm run prisma:reset
 
 ```console
 npm run prisma:seed
+```
+
+## 📦 Migrate Database <a name="migrate-database"></a>
+
+### Run database with Docker
+
+Export Data only (Run with Window Terminal), **run case by case**
+
+```console
+docker exec postgres_container pg_dump -U postgresql --data-only --encoding=UTF8 mtf_crm_db -f /tmp/data.sql
+
+docker cp postgres_container:/tmp/data-only.sql data.sql
+```
+
+Import data (change **your_database_name**)
+
+```console
+cmd /c "docker exec -i postgres_container psql -U postgresql -d your_database_name < data.sql"
 ```
 
 ## 📝 API List<a name="api-list"></a>
