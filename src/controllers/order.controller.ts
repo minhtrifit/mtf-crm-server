@@ -408,7 +408,8 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: paymentUrl
+      data: paymentUrl,
+      message: t('order.create_successfully')
     });
   } catch (error) {
     next(error);
