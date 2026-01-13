@@ -44,3 +44,22 @@ export const authorizeHandler =
 
     next();
   };
+
+// Middleware xác thực admin
+export const authenticateAdminHandler = (req: Request, res: Response, next: NextFunction) => {
+  const adminCode = req.body.adminCode;
+
+  const ADMIN_CODE = process.env.ADMIN_CODE;
+
+  if (!adminCode || adminCode !== ADMIN_CODE) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      data: null,
+      message: 'WRONG ADMIN CODE'
+    });
+  }
+
+  delete req.body.adminCode;
+
+  next();
+};

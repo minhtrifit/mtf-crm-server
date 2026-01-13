@@ -22,12 +22,23 @@
 - Config [.env]() file in root dir with path `./.env`
 - Project use [Prisma](https://www.prisma.io/docs/getting-started) as ORM
 
+- ADMIN_CODE: (optional) use for create admin account (**MUST MATCH** with **VITE_ADMIN_CODE** in client .env)
+
 ```bash
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:3000
+CLIENT_CHECKOUT_RETURN_PATHNAME=thanh-toan?step=3
 JWT_SECRET=mtf_crm_server
-DATABASE_URL="postgresql://postgresql:123456@localhost:5432/mtf_crm_db"
+JWT_EXPIRES_IN=1y
+ADMIN_CODE=abc123
+MAX_UPLOAD_FILES=7
+DATABASE_URL=postgresql://postgresql:123456@localhost:5432/mtf_crm_db
+
+// VNPay config
+VNP_TMNCODE=3R8DRRZ6
+VNP_HASHSECRET=3SU4FHTN79BFVT46CN7M8OIHYKHK4A9K
+VNP_RETURN_URL=http://localhost:5000/api/order/result/vnpay
 ```
 
 ## 📦 Installation <a name="installation"></a>
