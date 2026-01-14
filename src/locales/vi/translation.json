@@ -48,7 +48,7 @@
     "is_existed": "Sản phẩm đã tồn tại",
     "name_existed": "Tên sản phẩm đã tồn tại",
     "slug_existed": "Slug sản phẩm đã tồn tại",
-    "sku_existed": "Sku sản phẩm đã tồn tại",
+    "sku_existed": "SKU sản phẩm đã tồn tại",
     "create_successfully": "Thêm mới sản phẩm thành công",
     "update_successfully": "Cập nhật sản phẩm thành công",
     "slug_required": "Vui lòng chọn slug"

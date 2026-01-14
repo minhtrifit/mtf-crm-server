@@ -1,5 +1,6 @@
 import { prisma } from '@/libs/prisma';
 import { CategoryBase, GetCategoriesParams } from '@/models/Category';
+import { PagingType } from '@/models';
 
 export enum CategoryError {
   EXISTED = 'EXISTED',
@@ -37,14 +38,16 @@ export const categoryService = {
       prisma.category.count({ where })
     ]);
 
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
     return {
       data,
-      paging: {
-        current_page: page,
-        total_item: data.length,
-        total_page: Math.ceil(total / limit),
-        total
-      }
+      paging
     };
   },
 

@@ -48,7 +48,7 @@
     "is_existed": "Product is existed",
     "name_existed": "Product name is existed",
     "slug_existed": "Product slug is existed",
-    "sku_existed": "Product sku is existed",
+    "sku_existed": "Product SKU is existed",
     "create_successfully": "Create product successfully",
     "update_successfully": "Update product successfully",
     "slug_required": "Slug is required"

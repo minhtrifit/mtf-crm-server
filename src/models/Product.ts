@@ -1,3 +1,12 @@
+export interface GetProductsParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  categoryId?: string;
+  categorySlug?: string;
+  isActive?: string;
+}
+
 export interface ProductBase {
   name: string;
   slug: string;
