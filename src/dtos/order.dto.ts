@@ -4,6 +4,23 @@ import { DeliveryStatus, OrderStatus } from '@/models/Order';
 const orderStatusValues = Object.values(OrderStatus);
 const deliveryStatusValues = Object.values(DeliveryStatus);
 
+export const GetQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  q: Joi.string().trim().allow('').optional(),
+  status: Joi.string()
+    .valid(...orderStatusValues)
+    .allow('')
+    .optional(),
+  deliveryStatus: Joi.string()
+    .valid(...deliveryStatusValues)
+    .allow('')
+    .optional(),
+  buyerQ: Joi.string().trim().allow('').optional(),
+  fromPaidTime: Joi.string().trim().allow('').optional(),
+  toPaidTime: Joi.string().trim().allow('').optional()
+});
+
 export const GetParamsSchema = Joi.object({
   id: Joi.string().trim().required()
 });

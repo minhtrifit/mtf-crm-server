@@ -35,6 +35,17 @@ export enum DeliveryStatus {
   DELIVERED = 'DELIVERED' // giao hàng thành công
 }
 
+export interface GetOrdersParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  status?: OrderStatus;
+  deliveryStatus?: DeliveryStatus;
+  buyerQ?: string;
+  fromPaidTime?: string;
+  toPaidTime?: string;
+}
+
 export interface OrderBody {
   userId: string;
   deliveryAddress: string;

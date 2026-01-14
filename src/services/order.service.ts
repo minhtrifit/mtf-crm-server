@@ -3,8 +3,17 @@ import { TFunction } from 'i18next';
 import logger from '@/configs/logger';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { prisma } from '@/libs/prisma';
-import { HttpError } from '@/models';
-import { OrderBody, OrderItemPayload, OrderPayload, OrderStatus, UpdateOrderBody } from '@/models/Order';
+import { HttpError, PagingType } from '@/models';
+import {
+  DeliveryStatus,
+  GetOrdersParams,
+  OrderBody,
+  OrderItemPayload,
+  OrderPayload,
+  OrderStatus,
+  UpdateOrderBody
+} from '@/models/Order';
+import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/PaymentMethod';
 
 export enum OrderError {
@@ -17,6 +26,100 @@ export enum OrderError {
 }
 
 export const orderService = {
+  async getList(params: GetOrdersParams) {
+    const page = Math.max(Number(params.page) || 1, 1);
+    const limit = Math.min(Number(params.limit) || 10, 100);
+    const skip = (page - 1) * limit;
+
+    const q = params.q?.trim();
+    const buyerQ = params.buyerQ;
+    const fromPaidTime = params.fromPaidTime;
+    const toPaidTime = params.toPaidTime;
+
+    // Format: status
+    let status: OrderStatus | undefined = undefined;
+    if (params.status === OrderStatus.PENDING) status = OrderStatus.PENDING;
+    if (params.status === OrderStatus.PAID) status = OrderStatus.PAID;
+    if (params.status === OrderStatus.CANCELLED) status = OrderStatus.CANCELLED;
+
+    // Format: deliveryStatus
+    let deliveryStatus: DeliveryStatus | undefined = undefined;
+    if (params.deliveryStatus === DeliveryStatus.ORDERED) deliveryStatus = DeliveryStatus.ORDERED;
+    if (params.deliveryStatus === DeliveryStatus.CONFIRMED) deliveryStatus = DeliveryStatus.CONFIRMED;
+    if (params.deliveryStatus === DeliveryStatus.PREPARING) deliveryStatus = DeliveryStatus.PREPARING;
+    if (params.deliveryStatus === DeliveryStatus.SHIPPING) deliveryStatus = DeliveryStatus.SHIPPING;
+    if (params.deliveryStatus === DeliveryStatus.DELIVERED) deliveryStatus = DeliveryStatus.DELIVERED;
+
+    // Format: fromPaidTime && toPaidTime
+    const paidTimeWhere = buildPaidTimeWhere(fromPaidTime, toPaidTime);
+
+    const where: any = {
+      ...(status !== undefined && { status }),
+      ...(deliveryStatus !== undefined && { deliveryStatus }),
+      ...(q && {
+        OR: [
+          { orderCode: { contains: q, mode: 'insensitive' } },
+          { deliveryAddress: { contains: q, mode: 'insensitive' } },
+          { note: { contains: q, mode: 'insensitive' } }
+        ]
+      }),
+      ...(buyerQ && {
+        OR: [
+          {
+            user: {
+              OR: [
+                { fullName: { contains: buyerQ, mode: 'insensitive' } },
+                { phone: { contains: buyerQ, mode: 'insensitive' } },
+                { email: { contains: buyerQ, mode: 'insensitive' } }
+              ]
+            }
+          },
+          {
+            customer: {
+              OR: [
+                { fullName: { contains: buyerQ, mode: 'insensitive' } },
+                { phone: { contains: buyerQ, mode: 'insensitive' } },
+                { email: { contains: buyerQ, mode: 'insensitive' } }
+              ]
+            }
+          }
+        ]
+      }),
+      ...(paidTimeWhere && {
+        createdAt: paidTimeWhere
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          user: {
+            select: {
+              email: true,
+              fullName: true,
+              phone: true,
+              address: true
+            }
+          }
+        }
+      }),
+      prisma.order.count({ where })
+    ]);
+
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
+    return { data, paging };
+  },
+
   async getById(id: string) {
     // Find Order with ID
     const order = await prisma.order.findUnique({
@@ -107,7 +210,7 @@ export const orderService = {
     const order = await prisma.$transaction(async (tx) => {
       // Create order
       const newOrder: OrderPayload = {
-        orderCode: `USER-ORDER-${Date.now()}`,
+        orderCode: `${Date.now()}`,
         userId,
         deliveryAddress,
         note,
@@ -220,7 +323,7 @@ export const orderService = {
     const order = await prisma.$transaction(async (tx) => {
       // Create order
       const newOrder: OrderPayload = {
-        orderCode: `USER-ORDER-${Date.now()}`,
+        orderCode: `${Date.now()}`,
         userId,
         deliveryAddress,
         note,
