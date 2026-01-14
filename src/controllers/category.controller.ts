@@ -1,71 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
-import { prisma } from '@/libs/prisma';
 import { HTTP_STATUS } from '@/constants/http-status-code';
-import { PagingType } from '@/models';
-import { CategoryBase } from '@/models/Category';
-
-export const CreateSchema = Joi.object({
-  name: Joi.string().required(),
-  slug: Joi.string().required(),
-  imageUrl: Joi.string().required()
-});
-
-export const UpdateSchema = Joi.object({
-  name: Joi.string().min(1).optional(),
-  slug: Joi.string().min(1).optional(),
-  imageUrl: Joi.string().allow('').optional(),
-  isActive: Joi.boolean().optional()
-});
+import { CategoryError, categoryService } from '@/services/category.service';
 
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Number(req.query.limit) || 10, 100);
 
-    const q = (req.query.q as string)?.trim();
-    let isActive: boolean | undefined = undefined;
-
-    const skip = (page - 1) * limit;
-
-    if (req.query.isActive === 'true') {
-      isActive = true;
-    } else if (req.query.isActive === 'false') {
-      isActive = false;
-    }
-
-    // Build where condition
-    const where: any = {
-      ...(isActive !== undefined && { isActive }),
-      ...(q && {
-        OR: [{ name: { contains: q, mode: 'insensitive' } }, { slug: { contains: q, mode: 'insensitive' } }]
-      })
-    };
-
-    const [data, total] = await Promise.all([
-      prisma.category.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
-      }),
-      prisma.category.count({ where })
-    ]);
-
-    const paging: PagingType = {
-      current_page: page,
-      total_item: data.length,
-      total_page: Math.ceil(total / limit),
-      total
-    };
+    const result = await categoryService.getList(req.query);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: {
-        data,
-        paging
-      },
+      data: result,
       message: t('category.get_list_successfully')
     });
   } catch (error) {
@@ -77,10 +22,7 @@ export const getShowcaseCategories = async (req: Request, res: Response, next: N
   try {
     const { t } = req;
 
-    const data = await prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
-    });
+    const data = await categoryService.getShowcase();
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -97,35 +39,24 @@ export const getShowcaseCategories = async (req: Request, res: Response, next: N
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const id = req.params.id;
+    const { id } = req.validatedParams;
 
-    if (!id) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('category.id_required')
-      });
-    }
-
-    // Find Category with ID
-    const category = await prisma.category.findUnique({
-      where: { id: id }
-    });
-
-    if (!category) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        data: null,
-        message: t('category.not_found')
-      });
-    }
+    const category = await categoryService.getById(id);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: category,
       message: t('category.get_detail_successfully')
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === CategoryError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('category.not_found')
+      });
+    }
+
     next(error);
   }
 };
@@ -133,35 +64,24 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
 export const getCategoryBySlug = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const slug = req.params.slug;
+    const { slug } = req.validatedParams;
 
-    if (!slug) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('category.slug_required')
-      });
-    }
-
-    // Find Category with Slug
-    const category = await prisma.category.findUnique({
-      where: { slug: slug }
-    });
-
-    if (!category) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        data: null,
-        message: t('category.not_found')
-      });
-    }
+    const category = await categoryService.getBySlug(slug);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: category,
       message: t('category.get_detail_successfully')
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === CategoryError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('category.not_found')
+      });
+    }
+
     next(error);
   }
 };
@@ -169,55 +89,12 @@ export const getCategoryBySlug = async (req: Request, res: Response, next: NextF
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const { error, value } = CreateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
+    const { name, slug, imageUrl } = req.body;
 
-    if (!value) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('invalid_payload')
-      });
-    }
-
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { name, slug, imageUrl } = value;
-
-    // Find Category with Name
-    const existedCategory = await prisma.category.findFirst({
-      where: {
-        OR: [{ name }, { slug }]
-      }
-    });
-
-    if (existedCategory) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('category.is_existed')
-      });
-    }
-
-    const payload: CategoryBase = {
-      name: name,
-      slug: slug,
-      imageUrl: imageUrl
-    };
-
-    const category = await prisma.category.create({
-      data: payload
+    const category = await categoryService.create({
+      name,
+      slug,
+      imageUrl
     });
 
     return res.status(HTTP_STATUS.CREATED).json({
@@ -225,7 +102,15 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
       data: category,
       message: t('category.create_successfully')
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === CategoryError.EXISTED) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('category.is_existed')
+      });
+    }
+
     next(error);
   }
 };
@@ -243,112 +128,37 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    // Check category by ID
-    const category = await prisma.category.findUnique({
-      where: { id }
-    });
-
-    if (!category) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        message: t('category.not_found')
-      });
-    }
-
-    const { error, value } = UpdateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
-
-    if (!value) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('invalid_payload')
-      });
-    }
-
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { name, slug, imageUrl, isActive } = value;
-
-    // Build data update
-    const data: any = {};
-
-    if (name !== undefined) {
-      // Find category with name
-      const existedCategory = await prisma.category.findFirst({
-        where: {
-          name: name,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedCategory) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('category.name_existed')
-        });
-      }
-
-      data.name = name;
-    }
-    if (slug !== undefined) {
-      // Find category with slug
-      const existedCategory = await prisma.category.findFirst({
-        where: {
-          slug: slug,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedCategory) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('category.slug_existed')
-        });
-      }
-
-      data.slug = slug;
-    }
-    if (imageUrl !== undefined) data.imageUrl = imageUrl;
-    if (isActive !== undefined) data.isActive = isActive;
-
-    // Update
-    const updatedCategory = await prisma.category.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const updatedCategory = await categoryService.update(id, req.body);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedCategory,
       message: t('category.update_successfully')
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case CategoryError.NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('category.not_found')
+        });
+
+      case CategoryError.NAME_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('category.name_existed')
+        });
+
+      case CategoryError.SLUG_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('category.slug_existed')
+        });
+
+      default:
+        next(error);
+    }
   }
 };
