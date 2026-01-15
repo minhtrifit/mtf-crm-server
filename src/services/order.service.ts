@@ -14,7 +14,7 @@ import {
   UpdateOrderBody
 } from '@/models/Order';
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
-import { PaymentMethod, PaymentPayload } from '@/models/PaymentMethod';
+import { PaymentMethod, PaymentPayload } from '@/models/Payment';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -22,7 +22,8 @@ export enum OrderError {
   USER_NOT_FOUND = 'USER_NOT_FOUND',
   CREATED_FAILED = 'CREATED_FAILED',
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
-  PAYMENT_NOT_FOUND = 'PAYMENT_NOT_FOUND'
+  PAYMENT_NOT_FOUND = 'PAYMENT_NOT_FOUND',
+  PRODUCT_STOCK_NOT_ENOUGH = 'PRODUCT_STOCK_NOT_ENOUGH'
 }
 
 export const orderService = {
@@ -224,6 +225,29 @@ export const orderService = {
         data: newOrder
       });
 
+      // Update product stock
+      for (const item of orderItems) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true }
+        });
+
+        if (!product || product.stock < item.quantity) {
+          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+            productId: item.productId
+          });
+        }
+
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
+
       // Create payment
       const newPayment: PaymentPayload = {
         orderId: createdOrder.id,
@@ -336,6 +360,29 @@ export const orderService = {
       const createdOrder = await tx.order.create({
         data: newOrder
       });
+
+      // Update product stock
+      for (const item of orderItems) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true }
+        });
+
+        if (!product || product.stock < item.quantity) {
+          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+            productId: item.productId
+          });
+        }
+
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
 
       return createdOrder;
     });

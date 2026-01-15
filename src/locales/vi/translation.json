@@ -73,6 +73,10 @@
     "update_successfully": "Cập nhật đơn hàng thành công",
     "order_payment_id": "Thanh toán đơn hàng {{ orderId }}",
     "payment_not_found": "Không tìm thấy thông tin thanh toán",
-    "get_order_payment_successfully": "Lấy thông tin thanh toán đơn hàng thành công"
+    "get_order_payment_successfully": "Lấy thông tin thanh toán đơn hàng thành công",
+    "product_stock_not_enough": "Sản phẩm {{ productId }} Không đủ tồn kho"
+  },
+  "payment": {
+    "get_list_successfully": "Lấy lịch sử thanh toán thành công"
   }
 }

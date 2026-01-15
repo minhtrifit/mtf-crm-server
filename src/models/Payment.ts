@@ -3,6 +3,18 @@ export enum PaymentMethod {
   VNPAY = 'VNPAY'
 }
 
+export interface GetPaymentParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  orderId?: string;
+  method: PaymentMethod;
+  fromAmount?: number;
+  toAmount?: number;
+  fromPaidTime?: string;
+  toPaidTime?: string;
+}
+
 export interface PaymentPayload {
   orderId: string;
   amount: number;

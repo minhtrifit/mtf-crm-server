@@ -73,6 +73,16 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
         });
       }
 
+      case OrderError.PRODUCT_STOCK_NOT_ENOUGH: {
+        const productId = error.data.productId ?? [];
+
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('order.product_stock_not_enough', { productId: productId })
+        });
+      }
+
       case OrderError.CREATED_FAILED:
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
@@ -188,7 +198,7 @@ export const updateOrder = async (req: Request, res: Response, next: NextFunctio
       });
     }
 
-    const updatedOrder = orderService.update(id, req.body);
+    const updatedOrder = await orderService.update(id, req.body);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
