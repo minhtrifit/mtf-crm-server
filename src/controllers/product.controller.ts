@@ -89,7 +89,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const { t } = req;
 
-    const { name, slug, sku, price, stock, imagesUrl, description, categoryId } = req.validatedBody;
+    const { name, slug, sku, price, stock, imagesUrl, description, categoryId } = req.body;
 
     const product = await productService.create({
       name,

@@ -78,5 +78,13 @@
   },
   "payment": {
     "get_list_successfully": "Get payment history successfully"
+  },
+  "website_template": {
+    "get_list_successfully": "Get website templates successfully",
+    "get_detail_successfully": "Get website template successfully",
+    "not_found": "Website template not found",
+    "is_existed": "Template is existed",
+    "create_successfully": "Create website template successfully",
+    "update_successfully": "Update website template successfully"
   }
 }
