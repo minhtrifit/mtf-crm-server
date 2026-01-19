@@ -18,7 +18,8 @@ import {
   createProduct,
   updateProduct,
   getShowcaseProductsByCategorySlug,
-  getProductBySlug
+  getProductBySlug,
+  getAllProducts
 } from '@/controllers/product.controller';
 import { validateBody } from '@/middlewares/validate.middleware';
 
@@ -33,6 +34,7 @@ router.get(
   validateQuery(GetShowcaseByCategorySlugQuerySchema),
   getShowcaseProductsByCategorySlug
 );
+router.get('/all', authenticateHandler, authorizeHandler(Role.ADMIN), getAllProducts);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(CreateSchema), createProduct);
 router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(UpdateSchema), updateProduct);
 

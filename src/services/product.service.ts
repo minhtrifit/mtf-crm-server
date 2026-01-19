@@ -166,6 +166,27 @@ export const productService = {
     };
   },
 
+  async getAll() {
+    const data = await prisma.product.findMany({
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            imageUrl: true,
+            isActive: true
+          }
+        }
+      }
+    });
+
+    return {
+      data
+    };
+  },
+
   async create(payload: ProductBase) {
     const { name, slug, sku, categoryId } = payload;
 

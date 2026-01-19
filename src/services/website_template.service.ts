@@ -66,7 +66,10 @@ export const websiteTemplateService = {
 
   async getById(id: string) {
     const template = await prisma.websiteTemplate.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        sections: true
+      }
     });
 
     if (!template) {

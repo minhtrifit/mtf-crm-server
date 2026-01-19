@@ -85,6 +85,22 @@ export const getProductBySlug = async (req: Request, res: Response, next: NextFu
   }
 };
 
+export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await productService.getAll();
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('product.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

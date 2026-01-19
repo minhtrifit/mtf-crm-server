@@ -5,6 +5,19 @@ export interface GetWebsiteTemplatesParams {
   isActive?: string;
 }
 
+export interface SectionItemType {
+  id: string;
+  productId: string;
+  position: number;
+}
+
+export interface SectionType {
+  id: string;
+  title: string;
+  position: number;
+  items: SectionItemType[];
+}
+
 export interface WebsiteTemplateBase {
   name: string;
   primaryColor: string;
