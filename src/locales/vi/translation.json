@@ -82,8 +82,10 @@
   "website_template": {
     "get_list_successfully": "Lấy danh sách website template thành công",
     "get_detail_successfully": "Lấy thông tin website template thành công",
+    "id_required": "Vui lòng chọn mã template",
     "not_found": "Không tìm thấy template",
     "is_existed": "Template đã tồn tại",
+    "name_existed": "Tên template đã tồn tại",
     "create_successfully": "Thêm mới website template thành công",
     "update_successfully": "Cập nhật website template thành công"
   }

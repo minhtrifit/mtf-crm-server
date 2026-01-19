@@ -4,7 +4,8 @@ import { PagingType } from '@/models';
 
 export enum WebsiteTemplateError {
   NOT_FOUND = 'WEBSITE_TEMPLATE_NOT_FOUND',
-  WEBSITE_TEMPLATE_EXISTED = 'WEBSITE_TEMPLATE_EXISTED'
+  WEBSITE_TEMPLATE_EXISTED = 'WEBSITE_TEMPLATE_EXISTED',
+  NAME_EXISTED = 'NAME_EXISTED'
 }
 
 export const websiteTemplateService = {
@@ -63,6 +64,18 @@ export const websiteTemplateService = {
     return template;
   },
 
+  async getById(id: string) {
+    const template = await prisma.websiteTemplate.findUnique({
+      where: { id }
+    });
+
+    if (!template) {
+      throw new Error(WebsiteTemplateError.NOT_FOUND);
+    }
+
+    return template;
+  },
+
   async create(payload: WebsiteTemplateBase) {
     const { name, isActive } = payload;
 
@@ -90,6 +103,60 @@ export const websiteTemplateService = {
 
       return tx.websiteTemplate.create({
         data: payload
+      });
+    });
+  },
+
+  async update(id: string, payload: Partial<WebsiteTemplateBase>) {
+    const { name, primaryColor, logoUrl, isActive } = payload;
+
+    const template = await prisma.websiteTemplate.findUnique({
+      where: { id }
+    });
+
+    if (!template) {
+      throw new Error(WebsiteTemplateError.NOT_FOUND);
+    }
+
+    const data: any = {};
+
+    if (name !== undefined) {
+      // Find template with name
+      const existedTemplate = await prisma.websiteTemplate.findFirst({
+        where: {
+          name: name,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedTemplate) {
+        throw new Error(WebsiteTemplateError.NAME_EXISTED);
+      }
+
+      data.name = name;
+    }
+
+    if (primaryColor !== undefined) data.primaryColor = primaryColor;
+    if (logoUrl !== undefined) data.logoUrl = logoUrl;
+    if (isActive !== undefined) data.isActive = isActive;
+
+    return prisma.$transaction(async (tx) => {
+      if (isActive) {
+        await tx.websiteTemplate.updateMany({
+          where: {
+            isActive: true
+          },
+          data: {
+            isActive: false
+          }
+        });
+      }
+
+      return tx.websiteTemplate.update({
+        where: { id },
+        data
       });
     });
   }
