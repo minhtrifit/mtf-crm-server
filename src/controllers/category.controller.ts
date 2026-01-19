@@ -36,6 +36,24 @@ export const getShowcaseCategories = async (req: Request, res: Response, next: N
   }
 };
 
+export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const data = await categoryService.getAllCategories();
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        data
+      },
+      message: t('category.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

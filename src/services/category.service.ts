@@ -60,6 +60,14 @@ export const categoryService = {
     return data;
   },
 
+  async getAllCategories() {
+    const data = await prisma.category.findMany({
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
+    });
+
+    return data;
+  },
+
   async getById(id: string) {
     const category = await prisma.category.findUnique({
       where: { id }
@@ -152,17 +160,45 @@ export const categoryService = {
       data.isActive = payload.isActive;
     }
 
-    return prisma.category.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true
+    return prisma.$transaction(async (tx) => {
+      // Disabled all products by category id
+      if (payload.isActive === true) {
+        await tx.product.updateMany({
+          where: {
+            categoryId: id,
+            isActive: false
+          },
+          data: {
+            isActive: true
+          }
+        });
       }
+
+      // Enable all products by category id
+      if (payload.isActive === false) {
+        await tx.product.updateMany({
+          where: {
+            categoryId: id,
+            isActive: true
+          },
+          data: {
+            isActive: false
+          }
+        });
+      }
+
+      return tx.category.update({
+        where: { id },
+        data,
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
     });
   }
 };
