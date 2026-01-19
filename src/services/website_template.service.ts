@@ -68,7 +68,17 @@ export const websiteTemplateService = {
     const template = await prisma.websiteTemplate.findUnique({
       where: { id },
       include: {
-        sections: true
+        sections: {
+          orderBy: { position: 'asc' },
+          include: {
+            items: {
+              orderBy: { position: 'asc' },
+              include: {
+                product: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -80,12 +90,10 @@ export const websiteTemplateService = {
   },
 
   async create(payload: WebsiteTemplateBase) {
-    const { name, isActive } = payload;
+    const { name, isActive, sections, primaryColor, logoUrl } = payload;
 
     const existedTemplate = await prisma.websiteTemplate.findFirst({
-      where: {
-        name
-      }
+      where: { name }
     });
 
     if (existedTemplate) {
@@ -95,23 +103,47 @@ export const websiteTemplateService = {
     return prisma.$transaction(async (tx) => {
       if (isActive) {
         await tx.websiteTemplate.updateMany({
-          where: {
-            isActive: true
-          },
-          data: {
-            isActive: false
-          }
+          where: { isActive: true },
+          data: { isActive: false }
         });
       }
 
+      console.log(payload);
+
       return tx.websiteTemplate.create({
-        data: payload
+        data: {
+          name,
+          primaryColor,
+          logoUrl,
+          isActive,
+
+          sections: {
+            create: sections.map((section) => ({
+              title: section.title,
+              position: section.position,
+
+              items: {
+                create: section.items.map((item) => ({
+                  productId: item.productId,
+                  position: item.position
+                }))
+              }
+            }))
+          }
+        },
+        include: {
+          sections: {
+            include: {
+              items: true
+            }
+          }
+        }
       });
     });
   },
 
   async update(id: string, payload: Partial<WebsiteTemplateBase>) {
-    const { name, primaryColor, logoUrl, isActive } = payload;
+    const { name, primaryColor, logoUrl, isActive, sections } = payload;
 
     const template = await prisma.websiteTemplate.findUnique({
       where: { id }
@@ -124,13 +156,10 @@ export const websiteTemplateService = {
     const data: any = {};
 
     if (name !== undefined) {
-      // Find template with name
       const existedTemplate = await prisma.websiteTemplate.findFirst({
         where: {
-          name: name,
-          NOT: {
-            id: id
-          }
+          name,
+          NOT: { id }
         }
       });
 
@@ -148,19 +177,54 @@ export const websiteTemplateService = {
     return prisma.$transaction(async (tx) => {
       if (isActive) {
         await tx.websiteTemplate.updateMany({
-          where: {
-            isActive: true
-          },
-          data: {
-            isActive: false
-          }
+          where: { isActive: true },
+          data: { isActive: false }
         });
       }
 
-      return tx.websiteTemplate.update({
+      await tx.websiteTemplate.update({
         where: { id },
         data
       });
+
+      // ===== update sections =====
+      if (sections) {
+        // 1. delete all items
+        await tx.websiteSectionItem.deleteMany({
+          where: {
+            section: { templateId: id }
+          }
+        });
+
+        // 2. delete all sections
+        await tx.websiteSection.deleteMany({
+          where: { templateId: id }
+        });
+
+        // 3. recreate sections
+        for (const section of sections) {
+          const createdSection = await tx.websiteSection.create({
+            data: {
+              templateId: id,
+              title: section.title,
+              position: section.position
+            }
+          });
+
+          // 4. recreate items
+          if (section.items?.length) {
+            await tx.websiteSectionItem.createMany({
+              data: section.items.map((item) => ({
+                sectionId: createdSection.id,
+                productId: item.productId,
+                position: item.position
+              }))
+            });
+          }
+        }
+      }
+
+      return true;
     });
   }
 };
