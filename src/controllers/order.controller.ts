@@ -40,7 +40,7 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
 
-    const { userId, deliveryAddress, note, items } = req.body;
+    const { userId, deliveryAddress, note, items } = req.validatedBody;
 
     const payload: OrderBody = { userId, deliveryAddress, note, items };
 
@@ -101,7 +101,7 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
 
     const ipAddr = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '';
 
-    const { userId, deliveryAddress, note, items } = req.body;
+    const { userId, deliveryAddress, note, items } = req.validatedBody;
 
     const payload: OrderBody = { userId, deliveryAddress, note, items };
 
@@ -198,7 +198,7 @@ export const updateOrder = async (req: Request, res: Response, next: NextFunctio
       });
     }
 
-    const updatedOrder = await orderService.update(id, req.body);
+    const updatedOrder = await orderService.update(id, req.validatedBody);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,

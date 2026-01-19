@@ -89,7 +89,7 @@ export const getCategoryBySlug = async (req: Request, res: Response, next: NextF
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const { name, slug, imageUrl } = req.body;
+    const { name, slug, imageUrl } = req.validatedBody;
 
     const category = await categoryService.create({
       name,
@@ -128,7 +128,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    const updatedCategory = await categoryService.update(id, req.body);
+    const updatedCategory = await categoryService.update(id, req.validatedBody);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,

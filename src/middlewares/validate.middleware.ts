@@ -28,6 +28,6 @@ export const validateBody = (schema: any) => (req: Request, res: Response, next:
     });
   }
 
-  req.body = value; // 👉 body đã được clean
+  req.validatedBody = value;
   next();
 };

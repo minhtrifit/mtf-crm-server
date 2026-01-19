@@ -49,7 +49,7 @@ export const getShowcaseTemplate = async (req: Request, res: Response, next: Nex
 export const createTemplate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const { name, primaryColor, logoUrl, isActive } = req.body;
+    const { name, primaryColor, logoUrl, isActive } = req.validatedBody;
 
     const result = await websiteTemplateService.create({
       name,

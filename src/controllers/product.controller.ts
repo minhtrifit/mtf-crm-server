@@ -89,7 +89,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
   try {
     const { t } = req;
 
-    const { name, slug, sku, price, stock, imagesUrl, description, categoryId } = req.body;
+    const { name, slug, sku, price, stock, imagesUrl, description, categoryId } = req.validatedBody;
 
     const product = await productService.create({
       name,
@@ -145,7 +145,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    const updatedProduct = await productService.update(id, req.body);
+    const updatedProduct = await productService.update(id, req.validatedBody);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
