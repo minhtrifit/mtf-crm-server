@@ -31,6 +31,7 @@ export const CreateSchema = Joi.object({
   name: Joi.string().required(),
   primaryColor: Joi.string().required(),
   logoUrl: Joi.string().required(),
+  bannersUrl: Joi.array().items(Joi.string().uri()).optional(),
   isActive: Joi.boolean().required(),
   sections: Joi.array().items(SectionSchema)
 });
@@ -39,6 +40,7 @@ export const UpdateSchema = Joi.object({
   name: Joi.string().allow('').optional(),
   primaryColor: Joi.string().allow('').optional(),
   logoUrl: Joi.string().allow('').optional(),
+  bannersUrl: Joi.array().items(Joi.string().uri()).optional(),
   isActive: Joi.boolean().optional(),
   sections: Joi.array().items(SectionSchema)
 });

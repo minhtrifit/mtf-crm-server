@@ -177,7 +177,7 @@ export const websiteTemplateService = {
   },
 
   async update(id: string, payload: Partial<WebsiteTemplateBase>) {
-    const { name, primaryColor, logoUrl, isActive, sections } = payload;
+    const { name, primaryColor, logoUrl, bannersUrl, isActive, sections } = payload;
 
     const template = await prisma.websiteTemplate.findUnique({
       where: { id }
@@ -206,6 +206,7 @@ export const websiteTemplateService = {
 
     if (primaryColor !== undefined) data.primaryColor = primaryColor;
     if (logoUrl !== undefined) data.logoUrl = logoUrl;
+    if (bannersUrl !== undefined) data.bannersUrl = bannersUrl;
     if (isActive !== undefined) data.isActive = isActive;
 
     return prisma.$transaction(async (tx) => {

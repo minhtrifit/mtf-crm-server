@@ -160,6 +160,7 @@ model WebsiteTemplate {
   name          String
   primaryColor  String
   logoUrl       String
+  bannersUrl    String[]
   isActive      Boolean  @default(false)
 
   sections      WebsiteSection[]
