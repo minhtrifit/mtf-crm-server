@@ -124,7 +124,7 @@ export const websiteTemplateService = {
   },
 
   async create(payload: WebsiteTemplateBase) {
-    const { name, isActive, sections, primaryColor, logoUrl } = payload;
+    const { name, isActive, sections, primaryColor, logoUrl, email, phone, footerDescription } = payload;
 
     const existedTemplate = await prisma.websiteTemplate.findFirst({
       where: { name }
@@ -142,13 +142,14 @@ export const websiteTemplateService = {
         });
       }
 
-      console.log(payload);
-
       return tx.websiteTemplate.create({
         data: {
           name,
           primaryColor,
           logoUrl,
+          email,
+          phone,
+          footerDescription,
           isActive,
 
           sections: {
@@ -177,7 +178,7 @@ export const websiteTemplateService = {
   },
 
   async update(id: string, payload: Partial<WebsiteTemplateBase>) {
-    const { name, primaryColor, logoUrl, bannersUrl, isActive, sections } = payload;
+    const { name, primaryColor, logoUrl, bannersUrl, isActive, email, phone, footerDescription, sections } = payload;
 
     const template = await prisma.websiteTemplate.findUnique({
       where: { id }
@@ -207,6 +208,9 @@ export const websiteTemplateService = {
     if (primaryColor !== undefined) data.primaryColor = primaryColor;
     if (logoUrl !== undefined) data.logoUrl = logoUrl;
     if (bannersUrl !== undefined) data.bannersUrl = bannersUrl;
+    if (email !== undefined) data.email = email;
+    if (phone !== undefined) data.phone = phone;
+    if (footerDescription !== undefined) data.footerDescription = footerDescription;
     if (isActive !== undefined) data.isActive = isActive;
 
     return prisma.$transaction(async (tx) => {

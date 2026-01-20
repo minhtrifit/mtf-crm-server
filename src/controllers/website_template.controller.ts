@@ -103,13 +103,17 @@ export const getTemplateSections = async (req: Request, res: Response, next: Nex
 export const createTemplate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const { name, primaryColor, logoUrl, bannersUrl, isActive, sections } = req.validatedBody;
+    const { name, primaryColor, logoUrl, bannersUrl, email, phone, footerDescription, isActive, sections } =
+      req.validatedBody;
 
     const result = await websiteTemplateService.create({
       name,
       primaryColor,
       logoUrl,
       bannersUrl,
+      email,
+      phone,
+      footerDescription,
       isActive,
       sections
     });

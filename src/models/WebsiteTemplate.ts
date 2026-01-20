@@ -16,6 +16,9 @@ export interface WebsiteTemplateBase {
   primaryColor: string;
   logoUrl: string;
   bannersUrl: string[];
+  email: string;
+  phone: string;
+  footerDescription: string;
   isActive: boolean;
   sections: SectionType[];
 }
