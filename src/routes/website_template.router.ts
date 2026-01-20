@@ -10,6 +10,7 @@ import {
   getShowcaseTemplate,
   getTemplate,
   getTemplates,
+  getTemplateSections,
   updateTemplate
 } from '@/controllers/website_template.controller';
 
@@ -18,6 +19,7 @@ const router = Router();
 router.get('/', authenticateHandler, validateQuery(GetQuerySchema), getTemplates);
 router.get('/detail/:id', validateParams(GetParamsSchema), getTemplate);
 router.get('/showcase', getShowcaseTemplate);
+router.get('/sections/:id', validateParams(GetParamsSchema), getTemplateSections);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(CreateSchema), createTemplate);
 router.patch(
   '/edit/:id',

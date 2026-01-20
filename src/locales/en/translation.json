@@ -82,6 +82,7 @@
   "website_template": {
     "get_list_successfully": "Get website templates successfully",
     "get_detail_successfully": "Get website template successfully",
+    "get_section_list_successully": "Get website template section successfully",
     "id_required": "Template ID is required",
     "not_found": "Website template not found",
     "is_existed": "Template is existed",

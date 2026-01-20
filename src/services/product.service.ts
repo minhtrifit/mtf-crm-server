@@ -120,8 +120,9 @@ export const productService = {
   async getShowcaseByCategorySlug(categorySlug: string, params: GetProductsParams) {
     const page = Math.max(Number(params.page) || 1, 1);
     const limit = Math.min(Number(params.limit) || 10, 100);
-
     const skip = (page - 1) * limit;
+
+    const q = params.q?.trim();
 
     // Build where condition
     const where: any = {
@@ -129,6 +130,9 @@ export const productService = {
         category: {
           slug: categorySlug
         }
+      }),
+      ...(q && {
+        OR: [{ name: { contains: q, mode: 'insensitive' } }, { sku: { contains: q, mode: 'insensitive' } }]
       })
     };
 

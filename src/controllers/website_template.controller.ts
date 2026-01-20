@@ -71,6 +71,35 @@ export const getShowcaseTemplate = async (req: Request, res: Response, next: Nex
   }
 };
 
+export const getTemplateSections = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const { id } = req.validatedParams;
+
+    const result = await websiteTemplateService.getSections(id);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('website_template.get_section_list_successully')
+    });
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case WebsiteTemplateError.NOT_FOUND:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('website_template.not_found')
+        });
+
+      default:
+        next(error);
+    }
+  }
+};
+
 export const createTemplate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

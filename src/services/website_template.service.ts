@@ -64,6 +64,40 @@ export const websiteTemplateService = {
     return template;
   },
 
+  async getSections(id: string) {
+    const template = await prisma.websiteTemplate.findUnique({
+      where: {
+        id: id,
+        isActive: true
+      }
+    });
+
+    if (!template) {
+      throw new Error(WebsiteTemplateError.NOT_FOUND);
+    }
+
+    const sections = await prisma.websiteSection.findMany({
+      where: {
+        templateId: template.id
+      },
+      orderBy: {
+        position: 'asc'
+      },
+      include: {
+        items: {
+          include: {
+            product: true
+          },
+          orderBy: {
+            position: 'asc'
+          }
+        }
+      }
+    });
+
+    return sections;
+  },
+
   async getById(id: string) {
     const template = await prisma.websiteTemplate.findUnique({
       where: { id },
