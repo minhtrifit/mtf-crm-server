@@ -1,3 +1,10 @@
+export interface GetUsersParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  isActive?: string;
+}
+
 export enum Role {
   ADMIN = 'ADMIN',
   USER = 'USER'
@@ -21,4 +28,12 @@ export interface UserPayload extends UserBase {
   role: Role;
   phone: string | null;
   address: string | null;
+}
+
+export interface UpdateUserPayload extends UserBase {
+  role: Role;
+  phone: string | null;
+  address: string | null;
+  avatar: string | null;
+  isActive: boolean;
 }

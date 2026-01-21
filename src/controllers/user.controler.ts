@@ -1,81 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
 import { HTTP_STATUS } from '@/constants/http-status-code';
-import { prisma } from '@/libs/prisma';
-import { hashPassword, isValidRole } from '@/libs/auth';
-import { Role, UserPayload } from '@/models/User';
-import { PagingType } from '@/models';
-
-const roleValues = Object.values(Role);
-
-export const CreateSchema = Joi.object({
-  email: Joi.string().required(),
-  password: Joi.string().required(),
-  fullName: Joi.string().required(),
-  phone: Joi.string().allow('', null),
-  address: Joi.string().allow('', null),
-  role: Joi.string()
-    .valid(...roleValues)
-    .optional()
-});
-
-export const UpdateSchema = Joi.object({
-  email: Joi.string().min(1).optional(),
-  fullName: Joi.string().min(1).optional(),
-  phone: Joi.string().allow('').optional(),
-  address: Joi.string().allow('').optional(),
-  role: Joi.string()
-    .valid(...roleValues)
-    .optional()
-});
+import { UserError, userService } from '@/services/user.service';
+import { JwtPayload } from '@/libs/auth';
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
 
-    const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Number(req.query.limit) || 10, 100);
-
-    const q = (req.query.q as string)?.trim();
-    const isActive = req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined;
-
-    const skip = (page - 1) * limit;
-
-    // Build where condition
-    const where: any = {
-      ...(isActive !== undefined && { isActive }),
-      ...(q && {
-        OR: [
-          { email: { contains: q, mode: 'insensitive' } },
-          { fullName: { contains: q, mode: 'insensitive' } },
-          { phone: { contains: q, mode: 'insensitive' } }
-        ]
-      })
-    };
-
-    const [data, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.user.count({ where })
-    ]);
-
-    const paging: PagingType = {
-      current_page: page,
-      total_item: data.length,
-      total_page: Math.ceil(total / limit),
-      total
-    };
+    const result = await userService.getList(req.query);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: {
-        data,
-        paging
-      },
+      data: result,
       message: t('user.get_list_successfully')
     });
   } catch (error) {
@@ -86,37 +22,74 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-
-    // Check client id
     const id = req.params.id;
 
-    if (!id) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('user.user_id_not_found')
-      });
-    }
-
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { id: id }
-    });
-
-    if (!user) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        data: null,
-        message: t('user.user_not_found')
-      });
-    }
+    const user = await userService.getById(id);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: user,
       message: t('user.get_detail_successfully')
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === UserError.ID_NOT_FOUND) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('user.user_id_not_found')
+      });
+    }
+
+    if (error.message === UserError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('user.user_not_found')
+      });
+    }
+
+    next(error);
+  }
+};
+
+export const getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const id = req.params.id;
+    const jwtPayload = req.user;
+
+    const user = await userService.getProfile(id, jwtPayload as JwtPayload);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: user,
+      message: t('user.get_detail_successfully')
+    });
+  } catch (error: any) {
+    if (error.message === UserError.ID_NOT_FOUND) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('user.user_id_not_found')
+      });
+    }
+
+    if (error.message === UserError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('user.user_not_found')
+      });
+    }
+
+    if (error.message === UserError.NO_ACCESS_PERMISSION) {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        success: false,
+        data: null,
+        message: req.t('auth.no_permission')
+      });
+    }
+
     next(error);
   }
 };
@@ -125,85 +98,36 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   try {
     const { t } = req;
 
-    const { error, value } = CreateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
+    const { email, password, fullName, phone, address, role } = req.validatedBody;
 
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { email, password, fullName, phone, address, role } = value;
-
-    // Check role
-    // if (role && !isValidRole(role)) {
-    //   return res.status(HTTP_STATUS.BAD_REQUEST).json({
-    //     success: false,
-    //     data: null,
-    //     message: 'Role is not existed'
-    //   });
-    // }
-
-    // Find user with email
-    const existedEmail = await prisma.user.findUnique({
-      where: { email: email }
-    });
-
-    if (existedEmail) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('user.user_email_existed')
-      });
-    }
-
-    // Find user with phone if client request
-    if (phone) {
-      // Find user with phone
-      const existedPhone = await prisma.user.findUnique({
-        where: { phone: phone }
-      });
-
-      if (existedPhone) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('user.user_phone_existed')
-        });
-      }
-    }
-
-    // Hash user password
-    const hashedPassword = await hashPassword(password);
-
-    const newUser: UserPayload = {
-      email: email,
-      password: hashedPassword,
-      fullName: fullName,
-      phone: phone ? phone : null,
-      address: address ? address : null,
-      role: role ? role : Role.USER
-    };
-
-    const user = await prisma.user.create({
-      data: newUser
-    });
+    const user = await userService.create({ email, password, fullName, phone, address, role });
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: user,
       message: t('user.create_successfully')
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case UserError.EMAIL_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.user_email_existed')
+        });
+
+      case UserError.PHONE_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.user_phone_existed')
+        });
+
+      default:
+        next(error);
+    }
   }
 };
 
@@ -211,117 +135,48 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
   try {
     const { t } = req;
     const { id } = req.params;
+    const jwtPayload = req.user;
 
-    // Check user by ID
-    const user = await prisma.user.findUnique({
-      where: { id }
-    });
-
-    if (!user) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        message: t('user.user_not_found')
-      });
-    }
-
-    const { error, value } = UpdateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
-
-    if (!value) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('invalid_payload')
-      });
-    }
-
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { email, fullName, phone, address, isActive } = value;
-
-    // Build data update
-    const data: any = {};
-
-    if (fullName !== undefined) data.fullName = fullName;
-    if (email !== undefined) {
-      // Find user with email
-      const existedEmail = await prisma.user.findFirst({
-        where: {
-          email: email,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedEmail) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('user.user_email_existed')
-        });
-      }
-
-      data.email = email;
-    }
-    if (phone !== undefined) {
-      // Find user with phone
-      const existedPhone = await prisma.user.findFirst({
-        where: {
-          phone: phone,
-          NOT: {
-            id: id
-          },
-          AND: [{ phone: { not: null } }, { phone: { not: '' } }]
-        }
-      });
-
-      if (existedPhone) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('user.user_phone_existed')
-        });
-      }
-
-      data.phone = phone;
-    }
-    if (address !== undefined) data.address = address;
-    if (isActive !== undefined) data.isActive = isActive;
-
-    // Update
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        address: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const updatedUser = await userService.update(id, req.validatedBody, jwtPayload as JwtPayload);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedUser,
       message: t('user.update_successfully')
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case UserError.NO_ACCESS_PERMISSION:
+        return res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          data: null,
+          message: req.t('auth.no_permission')
+        });
+
+      case UserError.NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('user.user_not_found')
+        });
+
+      case UserError.EMAIL_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.user_email_existed')
+        });
+
+      case UserError.PHONE_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.user_phone_existed')
+        });
+
+      default:
+        next(error);
+    }
   }
 };
