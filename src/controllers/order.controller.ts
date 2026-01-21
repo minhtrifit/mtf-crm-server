@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { OrderBody } from '@/models/Order';
+import { JwtPayload } from '@/libs/auth';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { OrderError, orderService } from '@/services/order.service';
 
@@ -32,6 +33,32 @@ export const getOrder = async (req: Request, res: Response, next: NextFunction) 
       message: t('order.get_detail_successfully')
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrdersByUserId = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const id = req.params.id;
+    const jwtPayload = req.user;
+
+    const result = await orderService.getListByUserId(id, req.validatedQuery, jwtPayload as JwtPayload);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('order.get_list_successfully')
+    });
+  } catch (error: any) {
+    if (error.message === OrderError.NO_ACCESS_PERMISSION) {
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        success: false,
+        data: null,
+        message: req.t('auth.no_permission')
+      });
+    }
+
     next(error);
   }
 };

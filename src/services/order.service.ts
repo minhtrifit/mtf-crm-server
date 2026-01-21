@@ -3,6 +3,8 @@ import { TFunction } from 'i18next';
 import logger from '@/configs/logger';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { prisma } from '@/libs/prisma';
+import { JwtPayload } from '@/libs/auth';
+import { Role } from '@/models/User';
 import { HttpError, PagingType } from '@/models';
 import {
   DeliveryStatus,
@@ -23,7 +25,8 @@ export enum OrderError {
   CREATED_FAILED = 'CREATED_FAILED',
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
   PAYMENT_NOT_FOUND = 'PAYMENT_NOT_FOUND',
-  PRODUCT_STOCK_NOT_ENOUGH = 'PRODUCT_STOCK_NOT_ENOUGH'
+  PRODUCT_STOCK_NOT_ENOUGH = 'PRODUCT_STOCK_NOT_ENOUGH',
+  NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION'
 }
 
 export const orderService = {
@@ -102,6 +105,7 @@ export const orderService = {
             select: {
               email: true,
               fullName: true,
+              avatar: true,
               phone: true,
               address: true
             }
@@ -149,6 +153,105 @@ export const orderService = {
     }
 
     return order;
+  },
+
+  async getListByUserId(id: string, params: GetOrdersParams, jwtPayload: JwtPayload) {
+    if (jwtPayload.role === Role.USER && jwtPayload.userId !== id) {
+      throw new Error(OrderError.NO_ACCESS_PERMISSION);
+    }
+
+    const page = Math.max(Number(params.page) || 1, 1);
+    const limit = Math.min(Number(params.limit) || 10, 100);
+    const skip = (page - 1) * limit;
+
+    const q = params.q?.trim();
+    const buyerQ = params.buyerQ;
+    const fromPaidTime = params.fromPaidTime;
+    const toPaidTime = params.toPaidTime;
+
+    // Format: status
+    let status: OrderStatus | undefined = undefined;
+    if (params.status === OrderStatus.PENDING) status = OrderStatus.PENDING;
+    if (params.status === OrderStatus.PAID) status = OrderStatus.PAID;
+    if (params.status === OrderStatus.CANCELLED) status = OrderStatus.CANCELLED;
+
+    // Format: deliveryStatus
+    let deliveryStatus: DeliveryStatus | undefined = undefined;
+    if (params.deliveryStatus === DeliveryStatus.ORDERED) deliveryStatus = DeliveryStatus.ORDERED;
+    if (params.deliveryStatus === DeliveryStatus.CONFIRMED) deliveryStatus = DeliveryStatus.CONFIRMED;
+    if (params.deliveryStatus === DeliveryStatus.PREPARING) deliveryStatus = DeliveryStatus.PREPARING;
+    if (params.deliveryStatus === DeliveryStatus.SHIPPING) deliveryStatus = DeliveryStatus.SHIPPING;
+    if (params.deliveryStatus === DeliveryStatus.DELIVERED) deliveryStatus = DeliveryStatus.DELIVERED;
+
+    // Format: fromPaidTime && toPaidTime
+    const paidTimeWhere = buildPaidTimeWhere(fromPaidTime, toPaidTime);
+
+    const where: any = {
+      ...{ userId: id },
+      ...(status !== undefined && { status }),
+      ...(deliveryStatus !== undefined && { deliveryStatus }),
+      ...(q && {
+        OR: [
+          { orderCode: { contains: q, mode: 'insensitive' } },
+          { deliveryAddress: { contains: q, mode: 'insensitive' } },
+          { note: { contains: q, mode: 'insensitive' } }
+        ]
+      }),
+      ...(buyerQ && {
+        OR: [
+          {
+            user: {
+              OR: [
+                { fullName: { contains: buyerQ, mode: 'insensitive' } },
+                { phone: { contains: buyerQ, mode: 'insensitive' } },
+                { email: { contains: buyerQ, mode: 'insensitive' } }
+              ]
+            }
+          },
+          {
+            customer: {
+              OR: [
+                { fullName: { contains: buyerQ, mode: 'insensitive' } },
+                { phone: { contains: buyerQ, mode: 'insensitive' } },
+                { email: { contains: buyerQ, mode: 'insensitive' } }
+              ]
+            }
+          }
+        ]
+      }),
+      ...(paidTimeWhere && {
+        createdAt: paidTimeWhere
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          user: {
+            select: {
+              email: true,
+              fullName: true,
+              phone: true,
+              address: true
+            }
+          }
+        }
+      }),
+      prisma.order.count({ where })
+    ]);
+
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
+    return { data, paging };
   },
 
   async createCod(payload: OrderBody) {

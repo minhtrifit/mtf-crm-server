@@ -11,13 +11,21 @@ import {
   createVNPayOrder,
   handleVNpayReturn,
   updateOrder,
-  getOrders
+  getOrders,
+  getOrdersByUserId
 } from '@/controllers/order.controller';
 
 const router = Router();
 
 router.get('/', authenticateHandler, validateQuery(GetQuerySchema), getOrders);
 router.get('/detail/:id', authenticateHandler, validateParams(GetParamsSchema), getOrder);
+router.get(
+  '/list-by-user-id/:id',
+  authenticateHandler,
+  validateParams(GetParamsSchema),
+  validateQuery(GetQuerySchema),
+  getOrdersByUserId
+);
 router.post('/create-cod-order', authenticateHandler, validateBody(CreateSchema), createCodOrder);
 router.post('/create-vnpay-order', authenticateHandler, validateBody(CreateSchema), createVNPayOrder);
 router.get('/result/vnpay', handleVNpayReturn);
