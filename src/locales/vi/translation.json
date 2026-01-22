@@ -51,7 +51,10 @@
     "sku_existed": "SKU sản phẩm đã tồn tại",
     "create_successfully": "Thêm mới sản phẩm thành công",
     "update_successfully": "Cập nhật sản phẩm thành công",
-    "slug_required": "Vui lòng chọn slug"
+    "slug_required": "Vui lòng chọn slug",
+    "get_review_successfully": "Lấy đánh giá sản phẩm thành công",
+    "create_review_successfully": "Đánh giá sản phẩm thành công",
+    "review_already": "Người dùng đã đánh giá sản phẩm"
   },
   "customer": {
     "get_list_successfully": "Lấy danh sách người dùng thành công",

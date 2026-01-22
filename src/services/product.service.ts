@@ -1,5 +1,5 @@
 import { prisma } from '@/libs/prisma';
-import { GetProductsParams, ProductBase } from '@/models/Product';
+import { GetProductsParams, GetProductsReviewsParams, ProductBase, ProductReviewPayload } from '@/models/Product';
 import { PagingType } from '@/models';
 
 export enum ProductError {
@@ -8,7 +8,8 @@ export enum ProductError {
   CATEGORY_NOT_FOUND = 'CATEGORY_NOT_FOUND',
   NAME_EXISTED = 'PRODUCT_NAME_EXISTED',
   SLUG_EXISTED = 'PRODUCT_SLUG_EXISTED',
-  SKU_EXISTED = 'PRODUCT_SKU_EXISTED'
+  SKU_EXISTED = 'PRODUCT_SKU_EXISTED',
+  REVIEW_EXISTED = 'PRODUCT_REVIEW_EXISTED'
 }
 
 export const productService = {
@@ -325,5 +326,115 @@ export const productService = {
         updatedAt: true
       }
     });
+  },
+
+  async getReviews(id: string, params: GetProductsReviewsParams) {
+    const rate = Number(params.rate) || '';
+
+    // Find product
+    const product = await prisma.product.findUnique({
+      where: { id: id }
+    });
+
+    if (!product) throw new Error(ProductError.NOT_FOUND);
+
+    const ratingAgg = await prisma.review.aggregate({
+      where: { productId: id },
+      _avg: { rating: true },
+      _count: { rating: true }
+    });
+
+    const ratingGroup = await prisma.review.groupBy({
+      by: ['rating'],
+      where: { productId: id },
+      _count: { rating: true }
+    });
+
+    const ratingStats: Record<number, number> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    };
+
+    ratingGroup.forEach((item) => {
+      ratingStats[item.rating] = item._count.rating;
+    });
+
+    const comments = await prisma.review.findMany({
+      where: {
+        productId: id,
+        ...(rate && { rating: rate })
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            avatar: true
+          }
+        }
+      }
+    });
+
+    return {
+      ratingAvg: Number((ratingAgg._avg.rating ?? 0).toFixed(1)),
+      ratingCount: ratingAgg._count.rating,
+      ratingStats,
+      comments
+    };
+  },
+
+  async createReview(payload: ProductReviewPayload) {
+    const { userId, productId, rating, comment, imagesUrl } = payload;
+
+    // Find product
+    const product = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+
+    if (!product) throw new Error(ProductError.NOT_FOUND);
+
+    // Check user already review
+    const existedReview = await prisma.review.findUnique({
+      where: {
+        productId_userId: {
+          productId,
+          userId
+        }
+      }
+    });
+
+    if (existedReview) throw new Error(ProductError.REVIEW_EXISTED);
+
+    // Create review
+    await prisma.review.create({
+      data: {
+        productId,
+        userId,
+        rating,
+        comment,
+        imagesUrl
+      }
+    });
+
+    // Catculate rating
+    const stats = await prisma.review.aggregate({
+      where: { productId },
+      _avg: { rating: true },
+      _count: { rating: true }
+    });
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        ratingAvg: stats._avg.rating ?? 0,
+        ratingCount: stats._count.rating
+      }
+    });
+
+    return true;
   }
 };

@@ -207,3 +207,71 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     }
   }
 };
+
+export const getReviews = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const { id } = req.validatedParams;
+
+    const reviews = await productService.getReviews(id, req.validatedQuery);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: reviews,
+      message: t('product.get_review_successfully')
+    });
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case ProductError.NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('product.not_found')
+        });
+
+      case ProductError.REVIEW_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('product.review_already')
+        });
+
+      default:
+        next(error);
+    }
+  }
+};
+
+export const createReview = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const userId = req.user?.userId;
+
+    const review = await productService.createReview({ ...req.validatedBody, userId: userId });
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: review,
+      message: t('product.create_review_successfully')
+    });
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case ProductError.NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('product.not_found')
+        });
+
+      case ProductError.REVIEW_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('product.review_already')
+        });
+
+      default:
+        next(error);
+    }
+  }
+};

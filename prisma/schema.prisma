@@ -50,6 +50,8 @@ model User {
 
   orders    Order[]
 
+  reviews   Review[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -97,10 +99,35 @@ model Product {
 
   collectionItems WebsiteSectionItem[]
 
+  ratingAvg       Float    @default(0)
+  ratingCount     Int      @default(0)
+  reviews         Review[]
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@index([categoryId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+
+  rating    Int      // 1 → 5
+  comment   String
+  imagesUrl String[]
+
+  productId String
+  userId    String
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId]) // 1 user chỉ được review 1 lần / product
+  @@index([productId])
+  @@index([userId])
 }
 
 model Order {

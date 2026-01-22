@@ -51,7 +51,10 @@
     "sku_existed": "Product SKU is existed",
     "create_successfully": "Create product successfully",
     "update_successfully": "Update product successfully",
-    "slug_required": "Slug is required"
+    "slug_required": "Slug is required",
+    "get_review_successfully": "Get product reviews successfully",
+    "create_review_successfully": "Review product successfully",
+    "review_already": "User already reviewed product"
   },
   "customer": {
     "get_list_successfully": "Get customers successfully",

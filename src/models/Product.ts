@@ -22,3 +22,15 @@ export interface ProductBase {
 export interface Product extends ProductBase {
   id: string;
 }
+
+export interface ProductReviewPayload {
+  userId: string;
+  productId: string;
+  rating: number;
+  comment: string;
+  imagesUrl: string[];
+}
+
+export interface GetProductsReviewsParams {
+  rate?: number;
+}

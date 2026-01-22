@@ -4,10 +4,12 @@ import { validateQuery } from '@/middlewares/validate-query.middleware';
 import { validateParams } from '@/middlewares/validate-params.middleware';
 import { Role } from '@/models/User';
 import {
+  CreateReviewSchema,
   CreateSchema,
   GetBySlugParamsSchema,
   GetParamsSchema,
   GetQuerySchema,
+  GetReviewQuerySchema,
   GetShowcaseByCategorySlugParamsSchema,
   GetShowcaseByCategorySlugQuerySchema,
   UpdateSchema
@@ -19,7 +21,9 @@ import {
   updateProduct,
   getShowcaseProductsByCategorySlug,
   getProductBySlug,
-  getAllProducts
+  getAllProducts,
+  createReview,
+  getReviews
 } from '@/controllers/product.controller';
 import { validateBody } from '@/middlewares/validate.middleware';
 
@@ -37,5 +41,7 @@ router.get(
 router.get('/all', authenticateHandler, authorizeHandler(Role.ADMIN), getAllProducts);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(CreateSchema), createProduct);
 router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(UpdateSchema), updateProduct);
+router.get('/reviews/:id', validateQuery(GetReviewQuerySchema), validateParams(GetParamsSchema), getReviews);
+router.post('/create-review', authenticateHandler, validateBody(CreateReviewSchema), createReview);
 
 export default router;

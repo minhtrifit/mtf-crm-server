@@ -54,3 +54,14 @@ export const UpdateSchema = Joi.object({
   isActive: Joi.boolean().optional(),
   categoryId: Joi.string().min(1).optional()
 });
+
+export const CreateReviewSchema = Joi.object({
+  productId: Joi.string().trim().required(),
+  rating: Joi.number().positive().required(),
+  comment: Joi.string().trim().required(),
+  imagesUrl: Joi.array().items(Joi.string().uri()).optional()
+});
+
+export const GetReviewQuerySchema = Joi.object({
+  rate: Joi.number().integer().min(1).max(5).allow('').optional()
+});
