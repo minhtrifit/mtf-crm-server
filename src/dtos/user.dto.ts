@@ -33,5 +33,19 @@ export const UpdateSchema = Joi.object({
   avatar: Joi.string().allow('').optional(),
   role: Joi.string()
     .valid(...roleValues)
-    .optional()
+    .optional(),
+  isActive: Joi.boolean().optional()
+});
+
+export const RegisterSchema = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required(),
+  fullName: Joi.string().required(),
+  phone: Joi.string().allow('', null),
+  address: Joi.string().allow('', null)
+});
+
+export const LoginSchema = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required()
 });

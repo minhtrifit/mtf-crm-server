@@ -16,11 +16,13 @@ export const userService = {
   async getList(params: GetUsersParams) {
     const page = Math.max(Number(params.page) || 1, 1);
     const limit = Math.min(Number(params.limit) || 10, 100);
+    const skip = (page - 1) * limit;
 
     const q = (params.q as string)?.trim();
-    const isActive = params.isActive !== undefined ? params.isActive === 'true' : undefined;
 
-    const skip = (page - 1) * limit;
+    let isActive: boolean | undefined = undefined;
+    if (params.isActive === 'true') isActive = true;
+    if (params.isActive === 'false') isActive = false;
 
     // Build where condition
     const where: any = {
