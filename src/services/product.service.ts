@@ -107,7 +107,8 @@ export const productService = {
             imageUrl: true,
             isActive: true
           }
-        }
+        },
+        reviews: true
       }
     });
 
@@ -430,7 +431,7 @@ export const productService = {
     await prisma.product.update({
       where: { id: productId },
       data: {
-        ratingAvg: stats._avg.rating ?? 0,
+        ratingAvg: Number((stats._avg.rating ?? 0).toFixed(1)),
         ratingCount: stats._count.rating
       }
     });

@@ -103,6 +103,8 @@ model Product {
   ratingCount     Int      @default(0)
   reviews         Review[]
 
+  soldCount       Int @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

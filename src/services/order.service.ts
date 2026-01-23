@@ -612,27 +612,67 @@ export const orderService = {
   },
 
   async update(id: string, payload: Partial<UpdateOrderBody>) {
-    const { note, deliveryAddress, status, deliveryStatus } = payload;
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id },
+        include: {
+          items: true
+        }
+      });
 
-    // Find Order with ID
-    const order = await prisma.order.findUnique({
-      where: { id: id }
-    });
+      if (!order) throw new Error(OrderError.NOT_FOUND);
 
-    if (!order) {
-      throw new Error(OrderError.NOT_FOUND);
-    }
+      const data: any = {};
 
-    const data: any = {};
+      if (payload.note !== undefined) data.note = payload.note;
+      if (payload.deliveryAddress !== undefined) data.deliveryAddress = payload.deliveryAddress;
+      if (payload.status !== undefined) data.status = payload.status;
+      if (payload.deliveryStatus !== undefined) data.deliveryStatus = payload.deliveryStatus;
 
-    if (note !== undefined) data.note = note;
-    if (deliveryAddress !== undefined) data.deliveryAddress = deliveryAddress;
-    if (status !== undefined) data.status = status;
-    if (deliveryStatus !== undefined) data.deliveryStatus = deliveryStatus;
+      // Tính toán điều kiện để cập nhập soldCount
+      const wasDelivered = order.deliveryStatus === DeliveryStatus.DELIVERED; // Đã được giao hay chưa
+      const willBeDelivered = payload.deliveryStatus === DeliveryStatus.DELIVERED; // Giờ được đánh dấu là đã giao
+      // const isPaid = payload.status === OrderStatus.PAID; // Giờ được đánh dấu là đã thanh toán
 
-    return prisma.order.update({
-      where: { id },
-      data
+      // const isDeliveredNow = !wasDelivered && willBeDelivered && isPaid;
+      const isDeliveredNow = !wasDelivered && willBeDelivered;
+      const isCancelledNow = order.status !== OrderStatus.CANCELLED && payload.status === OrderStatus.CANCELLED;
+
+      // Update order trước
+      const updatedOrder = await tx.order.update({
+        where: { id },
+        data
+      });
+
+      // Chỉ tăng soldCount KHI CHUYỂN SANG DELIVERED
+      if (isDeliveredNow) {
+        for (const item of order.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              soldCount: {
+                increment: item.quantity
+              }
+            }
+          });
+        }
+      }
+
+      // Trả stock khi CANCELLED (nếu trước đó chưa delivered)
+      if (isCancelledNow && order.deliveryStatus !== DeliveryStatus.DELIVERED) {
+        for (const item of order.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                increment: item.quantity
+              }
+            }
+          });
+        }
+      }
+
+      return updatedOrder;
     });
   }
 };
