@@ -1,5 +1,7 @@
+import { getDateRange } from '@/helpers/stats.helper';
 import { prisma } from '@/libs/prisma';
-import { GetStatsOverviewParams } from '@/models/Stats';
+import { DeliveryStatus, OrderStatus } from '@/models/Order';
+import { GetStatsOverviewParams, GetsTopSellingProductsParams } from '@/models/Stats';
 
 export const statsService = {
   async getTotal() {
@@ -153,5 +155,100 @@ export const statsService = {
       },
       chart
     };
+  },
+
+  async getDeliveryStatus() {
+    const [ordered, confirmed, preparing, shipping, delivered] = await Promise.all([
+      prisma.order.count({ where: { deliveryStatus: DeliveryStatus.ORDERED } }),
+      prisma.order.count({ where: { deliveryStatus: DeliveryStatus.CONFIRMED } }),
+      prisma.order.count({ where: { deliveryStatus: DeliveryStatus.PREPARING } }),
+      prisma.order.count({ where: { deliveryStatus: DeliveryStatus.SHIPPING } }),
+      prisma.order.count({ where: { deliveryStatus: DeliveryStatus.DELIVERED } })
+    ]);
+
+    return {
+      ordered,
+      confirmed,
+      preparing,
+      shipping,
+      delivered
+    };
+  },
+
+  async getTopSellingProducts(filter: GetsTopSellingProductsParams) {
+    const { type } = filter;
+
+    const { start, end } = getDateRange(type);
+
+    const result = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: {
+        order: {
+          status: OrderStatus.PAID,
+          createdAt: {
+            gte: start,
+            lte: end
+          }
+        }
+      },
+      _sum: {
+        quantity: true
+      },
+      orderBy: {
+        _sum: {
+          quantity: 'desc'
+        }
+      },
+      take: 5
+    });
+
+    const productIds = result.map((r) => r.productId);
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds }
+      },
+      include: {
+        category: true
+      }
+    });
+
+    return result.map((item) => ({
+      product: products.find((p) => p.id === item.productId),
+      soldQuantity: item._sum.quantity ?? 0
+    }));
+  },
+
+  async getRecentOrders() {
+    const latestOrders = await prisma.order.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 5,
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            avatar: true
+          }
+        },
+        customer: {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true
+          }
+        },
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    return latestOrders;
   }
 };

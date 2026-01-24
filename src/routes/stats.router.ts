@@ -1,9 +1,15 @@
 import { Router } from 'express';
 import { validateQuery } from '@/middlewares/validate-query.middleware';
 import { authenticateHandler, authorizeHandler } from '@/middlewares/auth';
-import { GetOverviewSchema } from '@/dtos/stats.dto';
+import { GetOverviewSchema, GetTopSellingProductsSchema } from '@/dtos/stats.dto';
 import { Role } from '@/models/User';
-import { getOverview, getTotal } from '@/controllers/stats.controller';
+import {
+  getDeliveryStatus,
+  getOverview,
+  getRecentOrders,
+  getTopSellingProducts,
+  getTotal
+} from '@/controllers/stats.controller';
 
 const router = Router();
 
@@ -15,5 +21,14 @@ router.get(
   validateQuery(GetOverviewSchema),
   getOverview
 );
+router.get('/delivery-status', authenticateHandler, authorizeHandler(Role.ADMIN), getDeliveryStatus);
+router.get(
+  '/top-selling-products',
+  authenticateHandler,
+  authorizeHandler(Role.ADMIN),
+  validateQuery(GetTopSellingProductsSchema),
+  getTopSellingProducts
+);
+router.get('/recent-orders', authenticateHandler, authorizeHandler(Role.ADMIN), getRecentOrders);
 
 export default router;

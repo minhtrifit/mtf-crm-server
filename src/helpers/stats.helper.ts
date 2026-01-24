@@ -1,6 +1,23 @@
-export const getDateRange = (_type: 'year' | 'quarter', year: number): { start: Date; end: Date } => {
-  return {
-    start: new Date(year, 0, 1),
-    end: new Date(year, 11, 31, 23, 59, 59)
-  };
+import dayjs from 'dayjs';
+
+export const getDateRange = (type: 'week' | 'month' | 'year') => {
+  const now = dayjs();
+
+  switch (type) {
+    case 'week':
+      return {
+        start: now.startOf('week').toDate(),
+        end: now.endOf('week').toDate()
+      };
+    case 'month':
+      return {
+        start: now.startOf('month').toDate(),
+        end: now.endOf('month').toDate()
+      };
+    case 'year':
+      return {
+        start: now.startOf('year').toDate(),
+        end: now.endOf('year').toDate()
+      };
+  }
 };

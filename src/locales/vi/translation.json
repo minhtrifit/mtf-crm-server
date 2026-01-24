@@ -95,6 +95,9 @@
   },
   "stats": {
     "get_total_successfully": "Lấy thống kê tổng thành công",
-    "get_overview_successfully": "Lấy tổng quan thành công"
+    "get_overview_successfully": "Lấy tổng quan thành công",
+    "get_delivery_status_successfully": "Lấy thống kê giao hàng thành công",
+    "get_top_selling_product_successfully": "Lấy danh sách sản phẩm bán chạy thành công",
+    "get_recent_order_successfully": "Lấy đơn hàng gần nhất thành công"
   }
 }

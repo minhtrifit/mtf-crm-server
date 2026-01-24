@@ -95,6 +95,9 @@
   },
   "stats": {
     "get_total_successfully": "Get total stats successfully",
-    "get_overview_successfully": "Get overview stats successfully"
+    "get_overview_successfully": "Get overview stats successfully",
+    "get_delivery_status_successfully": "Get delivery stats successfully",
+    "get_top_selling_product_successfully": "Get top selling products successfully",
+    "get_recent_order_successfully": "Get recent orders successfully"
   }
 }
