@@ -92,5 +92,9 @@
     "name_existed": "Template name is existed",
     "create_successfully": "Create website template successfully",
     "update_successfully": "Update website template successfully"
+  },
+  "stats": {
+    "get_total_successfully": "Get total stats successfully",
+    "get_overview_successfully": "Get overview stats successfully"
   }
 }

@@ -92,5 +92,9 @@
     "name_existed": "Tên template đã tồn tại",
     "create_successfully": "Thêm mới website template thành công",
     "update_successfully": "Cập nhật website template thành công"
+  },
+  "stats": {
+    "get_total_successfully": "Lấy thống kê tổng thành công",
+    "get_overview_successfully": "Lấy tổng quan thành công"
   }
 }

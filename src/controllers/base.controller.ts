@@ -10,7 +10,7 @@ export const controllerHandler = async (req: Request, res: Response, next: NextF
     return res.status(HTTP_STATUS.OK).json({
       success: true
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 };
