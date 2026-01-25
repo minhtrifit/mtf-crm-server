@@ -64,7 +64,25 @@ export const orderService = {
         OR: [
           { orderCode: { contains: q, mode: 'insensitive' } },
           { deliveryAddress: { contains: q, mode: 'insensitive' } },
-          { note: { contains: q, mode: 'insensitive' } }
+          { note: { contains: q, mode: 'insensitive' } },
+          {
+            user: {
+              OR: [
+                { fullName: { contains: q, mode: 'insensitive' } },
+                { phone: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          },
+          {
+            customer: {
+              OR: [
+                { fullName: { contains: q, mode: 'insensitive' } },
+                { phone: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          }
         ]
       }),
       ...(buyerQ && {
@@ -123,6 +141,60 @@ export const orderService = {
     };
 
     return { data, paging };
+  },
+
+  async getSearchList(params: GetOrdersParams) {
+    const q = params.q?.trim();
+
+    const where: any = {
+      ...(q && {
+        OR: [
+          { orderCode: { contains: q, mode: 'insensitive' } },
+          { deliveryAddress: { contains: q, mode: 'insensitive' } },
+          { note: { contains: q, mode: 'insensitive' } },
+          {
+            user: {
+              OR: [
+                { fullName: { contains: q, mode: 'insensitive' } },
+                { phone: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          },
+          {
+            customer: {
+              OR: [
+                { fullName: { contains: q, mode: 'insensitive' } },
+                { phone: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } }
+              ]
+            }
+          }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          user: {
+            select: {
+              email: true,
+              fullName: true,
+              avatar: true,
+              phone: true,
+              address: true
+            }
+          },
+          payments: true
+        }
+      }),
+      prisma.order.count({ where })
+    ]);
+
+    return { data, total };
   },
 
   async getById(id: string) {

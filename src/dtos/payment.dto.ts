@@ -17,3 +17,19 @@ export const GetQuerySchema = Joi.object({
   fromPaidTime: Joi.string().trim().allow('').optional(),
   toPaidTime: Joi.string().trim().allow('').optional()
 });
+
+export const CreateSchema = Joi.object({
+  orderId: Joi.string().required(),
+  amount: Joi.number().positive().required(),
+  method: Joi.string()
+    .valid(...paymentMethodValues)
+    .required()
+});
+
+export const UpdateSchema = Joi.object({
+  orderId: Joi.string().required(),
+  amount: Joi.number().positive().optional(),
+  method: Joi.string()
+    .valid(...paymentMethodValues)
+    .optional()
+});

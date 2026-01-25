@@ -20,6 +20,22 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const getSearchOrders = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await orderService.getSearchList(req.validatedQuery);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('order.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

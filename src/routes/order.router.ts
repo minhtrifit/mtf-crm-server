@@ -12,12 +12,14 @@ import {
   handleVNpayReturn,
   updateOrder,
   getOrders,
-  getOrdersByUserId
+  getOrdersByUserId,
+  getSearchOrders
 } from '@/controllers/order.controller';
 
 const router = Router();
 
 router.get('/', authenticateHandler, validateQuery(GetQuerySchema), getOrders);
+router.get('/search', authenticateHandler, validateQuery(GetQuerySchema), getSearchOrders);
 router.get('/detail/:id', authenticateHandler, validateParams(GetParamsSchema), getOrder);
 router.get(
   '/list-by-user-id/:id',

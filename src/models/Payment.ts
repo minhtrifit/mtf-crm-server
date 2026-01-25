@@ -31,3 +31,9 @@ export interface Payment extends PaymentBase {
   id: string;
   paidAt: string;
 }
+
+export interface UpdatePaymentPayload {
+  orderId: string;
+  amount?: number;
+  method?: PaymentMethod;
+}

@@ -1,8 +1,13 @@
 import { prisma } from '@/libs/prisma';
-import { GetPaymentParams, PaymentMethod } from '@/models/Payment';
+import { GetPaymentParams, PaymentMethod, PaymentPayload, UpdatePaymentPayload } from '@/models/Payment';
 import { PagingType } from '@/models';
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { buildAmountRangeWhere } from '@/helpers/payment.helper';
+
+export enum PaymentError {
+  NOT_FOUND = 'PAYMENT_NOT_FOUND',
+  ORDER_NOT_FOUND = 'ORDER_NOT_FOUND'
+}
 
 export const paymentService = {
   async getList(params: GetPaymentParams) {
@@ -53,7 +58,13 @@ export const paymentService = {
         take: limit,
         orderBy: [{ paidAt: 'desc' }, { id: 'desc' }],
         include: {
-          order: true
+          order: {
+            include: {
+              user: true,
+              customer: true,
+              payments: true
+            }
+          }
         }
       }),
       prisma.payment.count({ where })
@@ -67,5 +78,49 @@ export const paymentService = {
     };
 
     return { data, paging };
+  },
+
+  async create(payload: PaymentPayload) {
+    const { orderId, amount, method } = payload;
+
+    const payment = await prisma.payment.create({
+      data: {
+        orderId,
+        amount,
+        method
+      }
+    });
+
+    return payment;
+  },
+
+  async update(id: string, payload: UpdatePaymentPayload) {
+    const { orderId, amount, method } = payload;
+
+    // Check payment by ID
+    const payment = await prisma.payment.findUnique({
+      where: { id }
+    });
+
+    if (!payment) throw new Error(PaymentError.NOT_FOUND);
+
+    // Check payment by ID
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+
+    if (!order) throw new Error(PaymentError.ORDER_NOT_FOUND);
+
+    const data: any = {};
+
+    if (amount !== undefined) data.amount = amount;
+    if (method !== undefined) data.method = method;
+
+    const result = await prisma.payment.update({
+      where: { id },
+      data
+    });
+
+    return result;
   }
 };

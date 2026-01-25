@@ -80,7 +80,11 @@
     "product_stock_not_enough": "Not enough product {{ productId }} stock"
   },
   "payment": {
-    "get_list_successfully": "Get payment history successfully"
+    "is_required": "Payment ID is required",
+    "not_found": "Payment not found",
+    "get_list_successfully": "Get payment history successfully",
+    "create_successfully": "Create payment successfully",
+    "update_successfully": "Update payment successfully"
   },
   "website_template": {
     "get_list_successfully": "Get website templates successfully",
