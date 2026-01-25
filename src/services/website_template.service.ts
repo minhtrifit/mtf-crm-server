@@ -124,7 +124,7 @@ export const websiteTemplateService = {
   },
 
   async create(payload: WebsiteTemplateBase) {
-    const { name, isActive, sections, primaryColor, logoUrl, email, phone, footerDescription } = payload;
+    const { name, isActive, sections, primaryColor, logoUrl, bannersUrl, email, phone, footerDescription } = payload;
 
     const existedTemplate = await prisma.websiteTemplate.findFirst({
       where: { name }
@@ -147,6 +147,7 @@ export const websiteTemplateService = {
           name,
           primaryColor,
           logoUrl,
+          bannersUrl,
           email,
           phone,
           footerDescription,

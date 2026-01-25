@@ -30,16 +30,20 @@ export const paymentService = {
 
     const where: any = {
       ...(q && {
-        OR: [{ id: { contains: q, mode: 'insensitive' } }, { orderId: { contains: q, mode: 'insensitive' } }]
+        OR: [
+          { id: { contains: q, mode: 'insensitive' } },
+          { orderId: { contains: q, mode: 'insensitive' } },
+          {
+            order: {
+              orderCode: { contains: q, mode: 'insensitive' }
+            }
+          }
+        ]
       }),
       ...(orderId !== undefined && { orderId }),
       ...(method !== undefined && { method }),
-      ...(amountWhere && {
-        amount: amountWhere
-      }),
-      ...(paidTimeWhere && {
-        paidAt: paidTimeWhere
-      })
+      ...(amountWhere && { amount: amountWhere }),
+      ...(paidTimeWhere && { paidAt: paidTimeWhere })
     };
 
     const [data, total] = await Promise.all([
@@ -47,7 +51,10 @@ export const paymentService = {
         where,
         skip,
         take: limit,
-        orderBy: [{ paidAt: 'desc' }, { id: 'desc' }]
+        orderBy: [{ paidAt: 'desc' }, { id: 'desc' }],
+        include: {
+          order: true
+        }
       }),
       prisma.payment.count({ where })
     ]);
