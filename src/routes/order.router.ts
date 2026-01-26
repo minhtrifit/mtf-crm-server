@@ -4,7 +4,7 @@ import { validateQuery } from '@/middlewares/validate-query.middleware';
 import { validateParams } from '@/middlewares/validate-params.middleware';
 import { validateBody } from '@/middlewares/validate.middleware';
 import { Role } from '@/models/User';
-import { CreateSchema, GetParamsSchema, GetQuerySchema, UpdateSchema } from '@/dtos/order.dto';
+import { CreateAdminSchema, CreateSchema, GetParamsSchema, GetQuerySchema, UpdateSchema } from '@/dtos/order.dto';
 import {
   getOrder,
   createCodOrder,
@@ -13,7 +13,8 @@ import {
   updateOrder,
   getOrders,
   getOrdersByUserId,
-  getSearchOrders
+  getSearchOrders,
+  createAdminOrder
 } from '@/controllers/order.controller';
 
 const router = Router();
@@ -31,6 +32,7 @@ router.get(
 router.post('/create-cod-order', authenticateHandler, validateBody(CreateSchema), createCodOrder);
 router.post('/create-vnpay-order', authenticateHandler, validateBody(CreateSchema), createVNPayOrder);
 router.get('/result/vnpay', handleVNpayReturn);
+router.post('/create-admin-order', authenticateHandler, validateBody(CreateAdminSchema), createAdminOrder);
 router.patch(
   '/update-order/:id',
   authenticateHandler,

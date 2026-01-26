@@ -9,6 +9,8 @@
 | Hủy đơn             | `CANCELLED` | (giữ nguyên hoặc thêm `CANCELLED`) |
 */
 
+import { PaymentMethod } from './Payment';
+
 /*
   * COD FLOW
   OrderStatus: PENDING
@@ -53,6 +55,13 @@ export interface OrderBody {
   items: OrderItemPayload[];
 }
 
+export interface AdminOrderBody extends OrderBody {
+  amount: number;
+  method: PaymentMethod;
+  status: OrderStatus;
+  deliveryStatus: DeliveryStatus;
+}
+
 export interface UpdateOrderBody {
   note: string;
   deliveryAddress: string;
@@ -69,6 +78,11 @@ export interface OrderPayload {
   items: {
     create: OrderItemPayload[];
   };
+}
+
+export interface AdminOrderPayload extends OrderPayload {
+  status: OrderStatus;
+  deliveryStatus: DeliveryStatus;
 }
 
 export interface OrderItemPayload {

@@ -19,6 +19,22 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+export const getSearchUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await userService.getSearchList(req.query);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('user.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

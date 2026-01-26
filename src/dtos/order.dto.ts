@@ -1,8 +1,10 @@
 import Joi from 'joi';
 import { DeliveryStatus, OrderStatus } from '@/models/Order';
+import { PaymentMethod } from '@/models/Payment';
 
 const orderStatusValues = Object.values(OrderStatus);
 const deliveryStatusValues = Object.values(DeliveryStatus);
+const paymentMethodValues = Object.values(PaymentMethod);
 
 export const GetQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
@@ -31,6 +33,31 @@ export const CreateSchema = Joi.object({
   deliveryAddress: Joi.string().required(),
   note: Joi.string().allow(''),
 
+  items: Joi.array()
+    .items(
+      Joi.object({
+        productId: Joi.string().uuid().required(),
+        quantity: Joi.number().integer().min(1).required()
+      })
+    )
+    .min(1)
+    .required()
+});
+
+export const CreateAdminSchema = Joi.object({
+  userId: Joi.string().uuid().required(),
+  amount: Joi.number().positive().required(),
+  method: Joi.string()
+    .valid(...paymentMethodValues)
+    .required(),
+  deliveryAddress: Joi.string().required(),
+  note: Joi.string().allow(''),
+  status: Joi.string()
+    .valid(...orderStatusValues)
+    .required(),
+  deliveryStatus: Joi.string()
+    .valid(...deliveryStatusValues)
+    .required(),
   items: Joi.array()
     .items(
       Joi.object({

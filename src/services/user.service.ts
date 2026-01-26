@@ -59,6 +59,39 @@ export const userService = {
     };
   },
 
+  async getSearchList(params: GetUsersParams) {
+    const q = (params.q as string)?.trim();
+
+    let isActive: boolean | undefined = undefined;
+    if (params.isActive === 'true') isActive = true;
+    if (params.isActive === 'false') isActive = false;
+
+    // Build where condition
+    const where: any = {
+      ...(isActive !== undefined && { isActive }),
+      ...(q && {
+        OR: [
+          { email: { contains: q, mode: 'insensitive' } },
+          { fullName: { contains: q, mode: 'insensitive' } },
+          { phone: { contains: q, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
+      }),
+      prisma.user.count({ where })
+    ]);
+
+    return {
+      data,
+      total
+    };
+  },
+
   async getById(id: string) {
     if (!id) throw new Error(UserError.ID_NOT_FOUND);
 

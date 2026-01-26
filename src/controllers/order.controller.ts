@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { OrderBody } from '@/models/Order';
+import { AdminOrderBody, OrderBody } from '@/models/Order';
 import { JwtPayload } from '@/libs/auth';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { OrderError, orderService } from '@/services/order.service';
@@ -174,6 +174,61 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
           message: invalidProductIds.map((id: string) => {
             return t('order.product_id_not_found', { productId: id });
           })
+        });
+      }
+
+      case OrderError.CREATED_FAILED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('order.create_failed')
+        });
+
+      default:
+        next(error);
+    }
+  }
+};
+
+export const createAdminOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await orderService.createAdmin(req.validatedBody);
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: result,
+      message: t('order.create_successfully')
+    });
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case OrderError.USER_NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('user.user_not_found')
+        });
+
+      case OrderError.PRODUCT_NOT_FOUND: {
+        const invalidProductIds = error.data.invalidProductIds ?? [];
+
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: invalidProductIds.map((id: string) => {
+            return t('order.product_id_not_found', { productId: id });
+          })
+        });
+      }
+
+      case OrderError.PRODUCT_STOCK_NOT_ENOUGH: {
+        const productId = error.data.productId ?? [];
+
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('order.product_stock_not_enough', { productId: productId })
         });
       }
 

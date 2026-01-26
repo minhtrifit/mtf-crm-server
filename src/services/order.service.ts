@@ -7,6 +7,8 @@ import { JwtPayload } from '@/libs/auth';
 import { Role } from '@/models/User';
 import { HttpError, PagingType } from '@/models';
 import {
+  AdminOrderBody,
+  AdminOrderPayload,
   DeliveryStatus,
   GetOrdersParams,
   OrderBody,
@@ -681,6 +683,147 @@ export const orderService = {
     }
 
     return `${clientUrl}/${clientCheckoutReturnPathname}&order_id=${vnpParams.vnp_TxnRef}&method=${PaymentMethod.VNPAY}&vnpResponseCode=${vnpResponseCode}`;
+  },
+
+  async createAdmin(payload: AdminOrderBody) {
+    const { userId, amount, deliveryAddress, note, method, status, deliveryStatus, items } = payload;
+
+    // Find user with userId
+    const existedUser = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!existedUser) {
+      throw new Error(OrderError.USER_NOT_FOUND);
+    }
+
+    // Find products with productId
+    const productIds = items.map((i: { productId: string; quantity: number }) => i.productId);
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        isActive: true
+      }
+    });
+
+    // Map product theo id
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    // Lấy danh sách productId không hợp lệ
+    const invalidProductIds = productIds.filter((id: string) => !productMap.has(id));
+
+    if (invalidProductIds.length > 0) {
+      throw new HttpError(OrderError.PRODUCT_NOT_FOUND, HTTP_STATUS.NOT_FOUND, {
+        invalidProductIds: invalidProductIds
+      });
+    }
+
+    // Map order items + calculate total
+    const orderItems: OrderItemPayload[] = items.map((item: { productId: string; quantity: number }) => {
+      const product = products.find((p) => p.id === item.productId)!;
+
+      return {
+        productId: product.id,
+        quantity: item.quantity,
+        price: product.price
+      };
+    });
+
+    const totalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
+
+    // Transaction
+
+    // prisma.$transaction => hoặc là full success hoặc là all rollback
+    // * Không bao giờ có trạng thái:
+    //    có Order ❌ nhưng không có Payment
+    //    có Payment ❌ nhưng không có OrderItems
+
+    const order = await prisma.$transaction(async (tx) => {
+      // Create order
+      const newOrder: AdminOrderPayload = {
+        orderCode: `${Date.now()}`,
+        userId,
+        deliveryAddress,
+        note,
+        totalAmount,
+        status,
+        deliveryStatus,
+        items: {
+          create: orderItems
+        }
+      };
+
+      const createdOrder = await tx.order.create({
+        data: newOrder
+      });
+
+      // Update product stock
+      for (const item of orderItems) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true }
+        });
+
+        if (!product || product.stock < item.quantity) {
+          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+            productId: item.productId
+          });
+        }
+
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
+
+      // Create payment
+      const newPayment: PaymentPayload = {
+        orderId: createdOrder.id,
+        amount: amount,
+        method: method
+      };
+
+      await tx.payment.create({
+        data: newPayment
+      });
+
+      const result = await tx.order.findUnique({
+        where: { id: createdOrder.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              address: true
+            }
+          },
+          items: {
+            include: {
+              product: true
+            }
+          },
+          payments: true
+        }
+      });
+
+      return result;
+    });
+
+    if (!order) {
+      throw new Error(OrderError.CREATED_FAILED);
+    }
+
+    // logger
+    logger.info('[CREATED ADMIN ORDER]', order);
+
+    return order;
   },
 
   async update(id: string, payload: Partial<UpdateOrderBody>) {
