@@ -65,3 +65,12 @@ export const CreateReviewSchema = Joi.object({
 export const GetReviewQuerySchema = Joi.object({
   rate: Joi.number().integer().min(1).max(5).allow('').optional()
 });
+
+export const GetSearchKeywordQuerySchema = Joi.object({
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  title: Joi.string().min(1).optional()
+});
+
+export const CreateSearchKeywordSchema = Joi.object({
+  title: Joi.string().trim().required()
+});

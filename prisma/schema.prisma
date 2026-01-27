@@ -111,6 +111,13 @@ model Product {
   @@index([categoryId])
 }
 
+model SearchKeyword {
+  id        String   @id @default(uuid())
+  title     String   @unique
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model Review {
   id        String   @id @default(uuid())
 

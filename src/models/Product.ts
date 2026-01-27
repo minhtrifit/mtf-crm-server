@@ -34,3 +34,21 @@ export interface ProductReviewPayload {
 export interface GetProductsReviewsParams {
   rate?: number;
 }
+
+export interface SearchKeywordBase {
+  title: string;
+  count: number;
+}
+
+export interface SearchKeyword extends SearchKeywordBase {
+  id: string;
+}
+
+export interface SearchKeywordPayload {
+  title: string;
+}
+
+export interface GetKeywordsParams {
+  title?: string;
+  limit?: number;
+}

@@ -6,10 +6,12 @@ import { Role } from '@/models/User';
 import {
   CreateReviewSchema,
   CreateSchema,
+  CreateSearchKeywordSchema,
   GetBySlugParamsSchema,
   GetParamsSchema,
   GetQuerySchema,
   GetReviewQuerySchema,
+  GetSearchKeywordQuerySchema,
   GetShowcaseByCategorySlugParamsSchema,
   GetShowcaseByCategorySlugQuerySchema,
   UpdateSchema
@@ -24,7 +26,9 @@ import {
   getAllProducts,
   createReview,
   getReviews,
-  getWebsiteSearchProducts
+  getWebsiteSearchProducts,
+  createSearchKeyword,
+  getSearchKeywords
 } from '@/controllers/product.controller';
 import { validateBody } from '@/middlewares/validate.middleware';
 
@@ -45,5 +49,7 @@ router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody
 router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(UpdateSchema), updateProduct);
 router.get('/reviews/:id', validateQuery(GetReviewQuerySchema), validateParams(GetParamsSchema), getReviews);
 router.post('/create-review', authenticateHandler, validateBody(CreateReviewSchema), createReview);
+router.get('/search-keywords', validateQuery(GetSearchKeywordQuerySchema), getSearchKeywords);
+router.post('/create-search-keyword', validateBody(CreateSearchKeywordSchema), createSearchKeyword);
 
 export default router;

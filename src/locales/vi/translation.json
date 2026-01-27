@@ -54,7 +54,9 @@
     "slug_required": "Vui lòng chọn slug",
     "get_review_successfully": "Lấy đánh giá sản phẩm thành công",
     "create_review_successfully": "Đánh giá sản phẩm thành công",
-    "review_already": "Người dùng đã đánh giá sản phẩm"
+    "review_already": "Người dùng đã đánh giá sản phẩm",
+    "get_search_keyword_successfully": "Lấy danh sách từ khóa tìm kiếm thành công",
+    "create_search_keyword_successfully": "Tạo từ khóa tìm kiếm thành công"
   },
   "customer": {
     "get_list_successfully": "Lấy danh sách người dùng thành công",

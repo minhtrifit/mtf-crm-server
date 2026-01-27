@@ -1,5 +1,12 @@
 import { prisma } from '@/libs/prisma';
-import { GetProductsParams, GetProductsReviewsParams, ProductBase, ProductReviewPayload } from '@/models/Product';
+import {
+  GetKeywordsParams,
+  GetProductsParams,
+  GetProductsReviewsParams,
+  ProductBase,
+  ProductReviewPayload,
+  SearchKeywordPayload
+} from '@/models/Product';
 import { PagingType } from '@/models';
 
 export enum ProductError {
@@ -473,5 +480,44 @@ export const productService = {
     });
 
     return true;
+  },
+
+  async getKeywords(params: GetKeywordsParams) {
+    const limit = Math.min(Number(params.limit) || 10, 100);
+    const title = params.title?.trim().toLowerCase();
+
+    return prisma.searchKeyword.findMany({
+      where: {
+        ...(title && {
+          title: {
+            contains: title,
+            mode: 'insensitive'
+          }
+        })
+      },
+      orderBy: [{ count: 'desc' }, { createdAt: 'desc' }],
+      take: limit
+    });
+  },
+
+  async createKeyword(payload: SearchKeywordPayload) {
+    const { title } = payload;
+
+    const normalizeKeyword = title.trim().toLowerCase();
+
+    return prisma.searchKeyword.upsert({
+      where: {
+        title: normalizeKeyword
+      },
+      create: {
+        title: normalizeKeyword,
+        count: 1
+      },
+      update: {
+        count: {
+          increment: 1
+        }
+      }
+    });
   }
 };

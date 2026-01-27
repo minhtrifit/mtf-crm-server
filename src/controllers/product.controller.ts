@@ -291,3 +291,35 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
     }
   }
 };
+
+export const getSearchKeywords = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await productService.getKeywords(req.validatedQuery);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('product.get_search_keyword_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createSearchKeyword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const review = await productService.createKeyword(req.validatedBody);
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: review,
+      message: t('product.create_search_keyword_successfully')
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
