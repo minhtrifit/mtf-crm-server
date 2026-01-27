@@ -56,7 +56,8 @@
     "create_review_successfully": "Review product successfully",
     "review_already": "User already reviewed product",
     "get_search_keyword_successfully": "Get search keyword list successfully",
-    "create_search_keyword_successfully": "Create search keyword successfully"
+    "create_search_keyword_successfully": "Create search keyword successfully",
+    "check_is_user_reviewed_successfully": "Check is user reviewd successfully"
   },
   "customer": {
     "get_list_successfully": "Get customers successfully",

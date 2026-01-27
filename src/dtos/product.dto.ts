@@ -66,6 +66,10 @@ export const GetReviewQuerySchema = Joi.object({
   rate: Joi.number().integer().min(1).max(5).allow('').optional()
 });
 
+export const GetCheckIsReviewedQuerySchema = Joi.object({
+  userId: Joi.string().trim().allow('').optional()
+});
+
 export const GetSearchKeywordQuerySchema = Joi.object({
   limit: Joi.number().integer().min(1).max(100).optional(),
   title: Joi.string().min(1).optional()

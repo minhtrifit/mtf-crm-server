@@ -258,6 +258,24 @@ export const getReviews = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const checkIsReviewd = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const { userId } = req.validatedQuery;
+    const { id } = req.validatedParams;
+
+    const reviews = await productService.checkIsReviewd(userId, id);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: reviews,
+      message: t('product.check_is_user_reviewed_successfully')
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export const createReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

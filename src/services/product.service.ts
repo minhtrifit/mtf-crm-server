@@ -431,6 +431,21 @@ export const productService = {
     };
   },
 
+  async checkIsReviewd(userId: string, productId: string) {
+    const review = await prisma.review.findUnique({
+      where: {
+        productId_userId: {
+          productId,
+          userId
+        }
+      }
+    });
+
+    if (!review) return false;
+
+    return true;
+  },
+
   async createReview(payload: ProductReviewPayload) {
     const { userId, productId, rating, comment, imagesUrl } = payload;
 
