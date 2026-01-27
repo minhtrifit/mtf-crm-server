@@ -23,13 +23,15 @@ import {
   getProductBySlug,
   getAllProducts,
   createReview,
-  getReviews
+  getReviews,
+  getWebsiteSearchProducts
 } from '@/controllers/product.controller';
 import { validateBody } from '@/middlewares/validate.middleware';
 
 const router = Router();
 
 router.get('/', validateQuery(GetQuerySchema), getProducts);
+router.get('/website-search', validateQuery(GetQuerySchema), getWebsiteSearchProducts);
 router.get('/detail/:id', validateParams(GetParamsSchema), getProduct);
 router.get('/detail-by-slug/:slug', validateParams(GetBySlugParamsSchema), getProductBySlug);
 router.get(

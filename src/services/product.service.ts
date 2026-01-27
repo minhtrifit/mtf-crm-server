@@ -72,6 +72,42 @@ export const productService = {
     return { data, paging };
   },
 
+  async getWebsiteSearchList(params: GetProductsParams) {
+    const q = params.q?.trim();
+
+    const where: any = {
+      ...{ isActive: true },
+      ...(q && {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { slug: { contains: q, mode: 'insensitive' } },
+          { sku: { contains: q, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              imageUrl: true,
+              isActive: true
+            }
+          }
+        }
+      }),
+      prisma.product.count({ where })
+    ]);
+
+    return { data, total };
+  },
+
   async getById(id: string) {
     const product = await prisma.product.findUnique({
       where: { id },

@@ -18,6 +18,22 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const getWebsiteSearchProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await productService.getWebsiteSearchList(req.validatedQuery);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('product.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getShowcaseProductsByCategorySlug = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
