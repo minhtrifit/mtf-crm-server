@@ -19,6 +19,8 @@ import {
 } from '@/models/Order';
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/Payment';
+import { CustomerPayload } from '@/models/Customer';
+import { customerService } from './customer.service';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -329,7 +331,7 @@ export const orderService = {
   },
 
   async createCod(payload: OrderBody) {
-    const { userId, deliveryAddress, note, items } = payload;
+    const { userId, phone, deliveryAddress, note, items } = payload;
 
     const clientUrl = process.env.CLIENT_URL!;
     const clientCheckoutReturnPathname = process.env.CLIENT_CHECKOUT_RETURN_PATHNAME!;
@@ -390,6 +392,7 @@ export const orderService = {
       const newOrder: OrderPayload = {
         orderCode: `${Date.now()}`,
         userId,
+        phone,
         deliveryAddress,
         note,
         totalAmount,
@@ -436,6 +439,22 @@ export const orderService = {
         data: newPayment
       });
 
+      // Create new user if not ready exist
+      const customer = await customerService.getByPhone(phone);
+
+      if (!customer) {
+        const newCustomer: CustomerPayload = {
+          fullName: existedUser.fullName,
+          phone: phone,
+          email: existedUser.email,
+          address: existedUser.address ?? ''
+        };
+
+        await prisma.customer.create({
+          data: newCustomer
+        });
+      }
+
       const result = await tx.order.findUnique({
         where: { id: createdOrder.id },
         include: {
@@ -474,7 +493,7 @@ export const orderService = {
   },
 
   async createVnPay(t: TFunction<'translation', undefined>, ipAddr: string, payload: OrderBody) {
-    const { userId, deliveryAddress, note, items } = payload;
+    const { userId, phone, deliveryAddress, note, items } = payload;
 
     // Find user with userId
     const existedUser = await prisma.user.findUnique({
@@ -526,6 +545,7 @@ export const orderService = {
       const newOrder: OrderPayload = {
         orderCode: `${Date.now()}`,
         userId,
+        phone,
         deliveryAddress,
         note,
         totalAmount,
@@ -558,6 +578,22 @@ export const orderService = {
               decrement: item.quantity
             }
           }
+        });
+      }
+
+      // Create new user if not ready exist
+      const customer = await customerService.getByPhone(phone);
+
+      if (!customer) {
+        const newCustomer: CustomerPayload = {
+          fullName: existedUser.fullName,
+          phone: phone,
+          email: existedUser.email,
+          address: existedUser.address ?? ''
+        };
+
+        await prisma.customer.create({
+          data: newCustomer
         });
       }
 
@@ -686,7 +722,7 @@ export const orderService = {
   },
 
   async createAdmin(payload: AdminOrderBody) {
-    const { userId, amount, deliveryAddress, note, method, status, deliveryStatus, items } = payload;
+    const { userId, amount, phone, deliveryAddress, note, method, status, deliveryStatus, items } = payload;
 
     // Find user with userId
     const existedUser = await prisma.user.findUnique({
@@ -744,6 +780,7 @@ export const orderService = {
       const newOrder: AdminOrderPayload = {
         orderCode: `${Date.now()}`,
         userId,
+        phone,
         deliveryAddress,
         note,
         totalAmount,
@@ -791,6 +828,22 @@ export const orderService = {
       await tx.payment.create({
         data: newPayment
       });
+
+      // Create new user if not ready exist
+      const customer = await customerService.getByPhone(phone);
+
+      if (!customer) {
+        const newCustomer: CustomerPayload = {
+          fullName: existedUser.fullName,
+          phone: phone,
+          email: existedUser.email,
+          address: existedUser.address ?? ''
+        };
+
+        await prisma.customer.create({
+          data: newCustomer
+        });
+      }
 
       const result = await tx.order.findUnique({
         where: { id: createdOrder.id },
@@ -840,6 +893,7 @@ export const orderService = {
       const data: any = {};
 
       if (payload.note !== undefined) data.note = payload.note;
+      if (payload.phone !== undefined) data.phone = payload.phone;
       if (payload.deliveryAddress !== undefined) data.deliveryAddress = payload.deliveryAddress;
       if (payload.status !== undefined) data.status = payload.status;
       if (payload.deliveryStatus !== undefined) data.deliveryStatus = payload.deliveryStatus;

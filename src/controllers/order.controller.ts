@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { AdminOrderBody, OrderBody } from '@/models/Order';
 import { JwtPayload } from '@/libs/auth';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { OrderError, orderService } from '@/services/order.service';
@@ -83,11 +82,7 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
 
-    const { userId, deliveryAddress, note, items } = req.validatedBody;
-
-    const payload: OrderBody = { userId, deliveryAddress, note, items };
-
-    const result = await orderService.createCod(payload);
+    const result = await orderService.createCod(req.validatedBody);
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
@@ -144,11 +139,7 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
 
     const ipAddr = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '';
 
-    const { userId, deliveryAddress, note, items } = req.validatedBody;
-
-    const payload: OrderBody = { userId, deliveryAddress, note, items };
-
-    const paymentUrl = await orderService.createVnPay(t, ipAddr, payload);
+    const paymentUrl = await orderService.createVnPay(t, ipAddr, req.validatedBody);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,

@@ -144,6 +144,7 @@ model Order {
   orderCode         String      @unique
   totalAmount       Float
   status            OrderStatus @default(PENDING)
+  phone             String
   deliveryAddress   String
   note              String?
   deliveryStatus    DeliveryStatus @default(ORDERED)

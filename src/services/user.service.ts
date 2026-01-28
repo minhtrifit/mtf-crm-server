@@ -9,7 +9,8 @@ export enum UserError {
   NOT_FOUND = 'USER_NOT_FOUND',
   EMAIL_EXISTED = 'USER_EMAIL_EXISTED',
   PHONE_EXISTED = 'USER_PHONE_EXISTED',
-  NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION'
+  NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION',
+  PHONE_REQUIRED = 'PHONE_REQUIRED'
 }
 
 export const userService = {
@@ -131,6 +132,27 @@ export const userService = {
         avatar: true,
         phone: true,
         address: true,
+        orders: {
+          include: {
+            payments: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      throw new Error(UserError.NOT_FOUND);
+    }
+
+    return user;
+  },
+
+  async getByPhone(phone: string) {
+    if (!phone) throw new Error(UserError.PHONE_REQUIRED);
+
+    const user = await prisma.user.findUnique({
+      where: { phone: phone },
+      include: {
         orders: {
           include: {
             payments: true

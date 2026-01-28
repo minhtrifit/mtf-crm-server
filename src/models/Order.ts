@@ -50,6 +50,7 @@ export interface GetOrdersParams {
 
 export interface OrderBody {
   userId: string;
+  phone: string;
   deliveryAddress: string;
   note: string;
   items: OrderItemPayload[];
@@ -64,6 +65,7 @@ export interface AdminOrderBody extends OrderBody {
 
 export interface UpdateOrderBody {
   note: string;
+  phone: string;
   deliveryAddress: string;
   status: OrderStatus;
   deliveryStatus: DeliveryStatus;
@@ -72,6 +74,7 @@ export interface UpdateOrderBody {
 export interface OrderPayload {
   orderCode: string;
   userId: string;
+  phone: string;
   deliveryAddress: string;
   note: string | null;
   totalAmount: number;

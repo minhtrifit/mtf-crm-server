@@ -1,70 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
-import { prisma } from '@/libs/prisma';
-import { BaseCustomer } from '@/models/Customer';
-import { PagingType } from '@/models';
 import { HTTP_STATUS } from '@/constants/http-status-code';
-
-export const CreateSchema = Joi.object({
-  fullName: Joi.string().required(),
-  phone: Joi.string().required(),
-  email: Joi.string().allow('', null),
-  address: Joi.string().required()
-});
-
-export const UpdateSchema = Joi.object({
-  fullName: Joi.string().min(1).optional(),
-  phone: Joi.string().min(1).optional(),
-  email: Joi.string().allow('').optional(),
-  address: Joi.string().min(1).optional()
-});
+import { CustomerError, customerService } from '@/services/customer.service';
 
 export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.min(Number(req.query.limit) || 10, 100);
-
-    const q = (req.query.q as string)?.trim();
-    const isActive = req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined;
-
-    const skip = (page - 1) * limit;
-
-    // Build where condition
-    const where: any = {
-      ...(isActive !== undefined && { isActive }),
-      ...(q && {
-        OR: [
-          { email: { contains: q, mode: 'insensitive' } },
-          { fullName: { contains: q, mode: 'insensitive' } },
-          { phone: { contains: q, mode: 'insensitive' } }
-        ]
-      })
-    };
-
-    const [data, total] = await Promise.all([
-      prisma.customer.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.customer.count({ where })
-    ]);
-
-    const paging: PagingType = {
-      current_page: page,
-      total_item: data.length,
-      total_page: Math.ceil(total / limit),
-      total
-    };
+    const result = await customerService.getCustomers(req.query);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: {
-        data,
-        paging
-      },
+      data: result,
       message: t('customer.get_list_successfully')
     });
   } catch (error) {
@@ -77,33 +22,30 @@ export const getCustomer = async (req: Request, res: Response, next: NextFunctio
     const { t } = req;
     const id = req.params.id;
 
-    if (!id) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('customer.is_required')
-      });
-    }
-
-    // Find Customer with ID
-    const customer = await prisma.customer.findUnique({
-      where: { id: id }
-    });
-
-    if (!customer) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        data: null,
-        message: t('customer.not_found')
-      });
-    }
+    const customer = await customerService.getCustomer(id);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: customer,
       message: t('customer.get_detail_successfully')
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === CustomerError.ID_NOT_FOUND) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('customer.is_required')
+      });
+    }
+
+    if (error.message === CustomerError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('customer.not_found')
+      });
+    }
+
     next(error);
   }
 };
@@ -111,63 +53,28 @@ export const getCustomer = async (req: Request, res: Response, next: NextFunctio
 export const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
-    const { error, value } = CreateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
 
-    if (!value) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('invalid_payload')
-      });
-    }
-
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { fullName, phone, email, address } = value;
-
-    // Find Customer with phone
-    const existedCustomer = await prisma.customer.findFirst({
-      where: { phone: phone }
-    });
-
-    if (existedCustomer) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('customer.phone_existed')
-      });
-    }
-
-    const newCustomer: BaseCustomer = {
-      fullName: fullName,
-      phone: phone,
-      email: email ? email : null,
-      address: address
-    };
-
-    const customer = await prisma.customer.create({
-      data: newCustomer
-    });
+    const customer = await customerService.create(req.validatedBody);
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: customer,
       message: t('customer.create_successfully')
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case CustomerError.PHONE_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('customer.phone_existed')
+        });
+
+      default:
+        next(error);
+    }
   }
 };
 
@@ -176,101 +83,31 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
     const { t } = req;
     const { id } = req.params;
 
-    if (!id) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('category.id_required')
-      });
-    }
-
-    // Check customer by ID
-    const customer = await prisma.customer.findUnique({
-      where: { id }
-    });
-
-    if (!customer) {
-      return res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        message: t('customer.not_found')
-      });
-    }
-
-    const { error, value } = UpdateSchema.validate(req.body, {
-      abortEarly: false, // trả về tất cả lỗi
-      allowUnknown: false // không cho field dư
-    });
-
-    if (!value) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: t('invalid_payload')
-      });
-    }
-
-    if (error) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        data: null,
-        message: error.details.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
-      });
-    }
-
-    const { fullName, phone, email, address } = value;
-
-    // Build data update
-    const data: any = {};
-
-    if (fullName !== undefined) data.fullName = fullName;
-    if (phone !== undefined) {
-      // Find customer with phone
-      const existedPhone = await prisma.customer.findFirst({
-        where: {
-          phone: phone,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedPhone) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          data: null,
-          message: t('customer.phone_existed')
-        });
-      }
-
-      data.phone = phone;
-    }
-    if (email !== undefined) data.email = email;
-    if (address !== undefined) data.address = address;
-
-    // Update
-    const updatedCustomer = await prisma.customer.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        address: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const updatedCustomer = await customerService.update(id, req.validatedBody);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: updatedCustomer,
       message: t('customer.update_successfully')
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case CustomerError.NOT_FOUND:
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: t('customer.not_found')
+        });
+      case CustomerError.PHONE_EXISTED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('customer.phone_existed')
+        });
+
+      default:
+        next(error);
+    }
   }
 };
