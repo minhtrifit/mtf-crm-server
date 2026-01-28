@@ -114,7 +114,7 @@ Export Data only (Run with Window Terminal), **run case by case**
 ```console
 docker exec postgres_container pg_dump -U postgresql --data-only --encoding=UTF8 mtf_crm_db -f /tmp/data.sql
 
-docker cp postgres_container:/tmp/data-only.sql data.sql
+docker cp postgres_container:/tmp/data.sql data.sql
 ```
 
 Import data (change **your_database_name**)
