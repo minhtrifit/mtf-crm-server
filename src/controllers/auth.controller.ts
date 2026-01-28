@@ -22,6 +22,14 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       });
     }
 
+    if (error.message === AuthError.PHONE_EXISTED) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('user.user_phone_existed')
+      });
+    }
+
     next(error);
   }
 };

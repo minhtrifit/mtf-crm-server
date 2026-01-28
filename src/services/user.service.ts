@@ -185,9 +185,7 @@ export const userService = {
       where: { email: email }
     });
 
-    if (existedEmail) {
-      throw new Error(UserError.EMAIL_EXISTED);
-    }
+    if (existedEmail) throw new Error(UserError.EMAIL_EXISTED);
 
     // Find user with phone if client request
     if (phone) {
@@ -196,9 +194,14 @@ export const userService = {
         where: { phone: phone }
       });
 
-      if (existedPhone) {
-        throw new Error(UserError.EMAIL_EXISTED);
-      }
+      if (existedPhone) throw new Error(UserError.PHONE_EXISTED);
+
+      // Find customer with phone
+      const existedCustomerPhone = await prisma.customer.findUnique({
+        where: { phone: phone }
+      });
+
+      if (existedCustomerPhone) throw new Error(UserError.PHONE_EXISTED);
     }
 
     // Hash user password
@@ -251,9 +254,7 @@ export const userService = {
         }
       });
 
-      if (existedEmail) {
-        throw new Error(UserError.EMAIL_EXISTED);
-      }
+      if (existedEmail) throw new Error(UserError.EMAIL_EXISTED);
 
       data.email = email;
     }
@@ -269,11 +270,23 @@ export const userService = {
         }
       });
 
-      if (existedPhone) {
-        throw new Error(UserError.PHONE_EXISTED);
-      }
+      if (existedPhone) throw new Error(UserError.PHONE_EXISTED);
 
-      data.phone = phone;
+      // Find customer with phone
+      const existedCustomerPhone = await prisma.customer.findFirst({
+        where: {
+          phone: phone as string,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedCustomerPhone) throw new Error(UserError.PHONE_EXISTED);
+
+      const normalizedPhone = phone?.trim() || null;
+
+      data.phone = normalizedPhone;
     }
     if (address !== undefined) data.address = address;
     if (avatar !== undefined) data.avatar = avatar;

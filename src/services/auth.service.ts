@@ -9,7 +9,8 @@ export enum AuthError {
   EMAIL_EXISTED = 'USER_EMAIL_EXISTED',
   NO_PERMISSION = 'NO_PERMISSION',
   EMAIL_PASSWORD_NOT_MATCH = 'EMAIL_PASSWORD_NOT_MATCH',
-  AUTHORZIED_FAILED = 'AUTHORZIED_FAILED'
+  AUTHORZIED_FAILED = 'AUTHORZIED_FAILED',
+  PHONE_EXISTED = 'PHONE_EXISTED'
 }
 
 export const authService = {
@@ -21,8 +22,23 @@ export const authService = {
       where: { email: email }
     });
 
-    if (existedUser) {
-      throw new Error(AuthError.EMAIL_EXISTED);
+    if (existedUser) throw new Error(AuthError.EMAIL_EXISTED);
+
+    // Find user with phone if client request
+    if (phone) {
+      // Find user with phone
+      const existedPhone = await prisma.user.findUnique({
+        where: { phone: phone }
+      });
+
+      if (existedPhone) throw new Error(AuthError.PHONE_EXISTED);
+
+      // Find customer with phone
+      const existedCustomerPhone = await prisma.customer.findUnique({
+        where: { phone: phone }
+      });
+
+      if (existedCustomerPhone) throw new Error(AuthError.PHONE_EXISTED);
     }
 
     // Hash user password

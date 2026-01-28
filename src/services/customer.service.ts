@@ -140,6 +140,18 @@ export const customerService = {
 
       if (existedPhone) throw new Error(CustomerError.PHONE_EXISTED);
 
+      // Find user with phone
+      const existedUserPhone = await prisma.user.findFirst({
+        where: {
+          phone: phone,
+          NOT: {
+            id: id
+          }
+        }
+      });
+
+      if (existedUserPhone) throw new Error(CustomerError.PHONE_EXISTED);
+
       data.phone = phone;
     }
     if (email !== undefined) data.email = email;
