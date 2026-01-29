@@ -195,13 +195,6 @@ export const userService = {
       });
 
       if (existedPhone) throw new Error(UserError.PHONE_EXISTED);
-
-      // Find customer with phone
-      const existedCustomerPhone = await prisma.customer.findUnique({
-        where: { phone: phone }
-      });
-
-      if (existedCustomerPhone) throw new Error(UserError.PHONE_EXISTED);
     }
 
     // Hash user password
@@ -271,18 +264,6 @@ export const userService = {
       });
 
       if (existedPhone) throw new Error(UserError.PHONE_EXISTED);
-
-      // Find customer with phone
-      const existedCustomerPhone = await prisma.customer.findFirst({
-        where: {
-          phone: phone as string,
-          NOT: {
-            id: id
-          }
-        }
-      });
-
-      if (existedCustomerPhone) throw new Error(UserError.PHONE_EXISTED);
 
       const normalizedPhone = phone?.trim() || null;
 

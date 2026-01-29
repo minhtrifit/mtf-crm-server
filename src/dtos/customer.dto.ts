@@ -22,5 +22,5 @@ export const UpdateSchema = Joi.object({
   fullName: Joi.string().min(1).optional(),
   phone: Joi.string().min(1).optional(),
   email: Joi.string().allow('').optional(),
-  address: Joi.string().min(1).optional()
+  address: Joi.string().allow('').optional()
 });
