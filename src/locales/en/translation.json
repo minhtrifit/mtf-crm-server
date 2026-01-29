@@ -59,15 +59,6 @@
     "create_search_keyword_successfully": "Create search keyword successfully",
     "check_is_user_reviewed_successfully": "Check is user reviewd successfully"
   },
-  "customer": {
-    "get_list_successfully": "Get customers successfully",
-    "get_detail_successfully": "Get customer successfully",
-    "is_required": "Customer ID is required",
-    "not_found": "Customer not found",
-    "phone_existed": "Customer phone is existed",
-    "create_successfully": "Create customer successfully",
-    "update_successfully": "Update customer successfully"
-  },
   "order": {
     "get_list_successfully": "Get orders successfully",
     "get_detail_successfully": "Get order successfully",

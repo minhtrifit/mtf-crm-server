@@ -59,15 +59,6 @@
     "create_search_keyword_successfully": "Tạo từ khóa tìm kiếm thành công",
     "check_is_user_reviewed_successfully": "Kiểm tra người dùng đã đánh giá thành công"
   },
-  "customer": {
-    "get_list_successfully": "Lấy danh sách người dùng thành công",
-    "get_detail_successfully": "Lấy thông tin người dùng thành công",
-    "is_required": "Vui lòng chọn mã người dùng",
-    "not_found": "Không tìm thấy người dùng",
-    "phone_existed": "Số điện thoại người dùng đã tồn tại",
-    "create_successfully": "Thêm mới người dùng thành công",
-    "update_successfully": "Cập nhật người dùng thành công"
-  },
   "order": {
     "get_list_successfully": "Lấy danh sách đơn hàng thành công",
     "get_detail_successfully": "Lấy thông tin đơn hàng thành công",
