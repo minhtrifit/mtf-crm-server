@@ -5,10 +5,9 @@ import { GetStatsOverviewParams, GetsTopSellingProductsParams } from '@/models/S
 
 export const statsService = {
   async getTotal() {
-    const [orders, users, customers, revenue] = await Promise.all([
+    const [orders, users, revenue] = await Promise.all([
       prisma.order.count(),
       prisma.user.count(),
-      prisma.customer.count(),
       prisma.payment.aggregate({
         _sum: {
           amount: true
@@ -24,7 +23,7 @@ export const statsService = {
     return {
       total_orders: orders,
       total_revenue: revenue._sum.amount ?? 0,
-      total_users: users + customers
+      total_users: users
     };
   },
 
@@ -36,7 +35,7 @@ export const statsService = {
 
     /* ================= OVERVIEW ================= */
 
-    const [totalProducts, totalOrders, totalUsers, totalCustomers, revenueAgg] = await Promise.all([
+    const [totalProducts, totalOrders, totalUsers, revenueAgg] = await Promise.all([
       prisma.product.count({
         where: { createdAt: { gte: start, lte: end } }
       }),
@@ -46,10 +45,6 @@ export const statsService = {
       }),
 
       prisma.user.count({
-        where: { createdAt: { gte: start, lte: end } }
-      }),
-
-      prisma.customer.count({
         where: { createdAt: { gte: start, lte: end } }
       }),
 
@@ -86,11 +81,6 @@ export const statsService = {
           SELECT COUNT(*) FROM "User" u
           WHERE EXTRACT(MONTH FROM u."createdAt") = m.month
           AND EXTRACT(YEAR FROM u."createdAt") = ${year}
-        ) +
-        (
-          SELECT COUNT(*) FROM "Customer" c
-          WHERE EXTRACT(MONTH FROM c."createdAt") = m.month
-          AND EXTRACT(YEAR FROM c."createdAt") = ${year}
         ) AS users,
 
         COALESCE(SUM(p.amount), 0) AS revenue
@@ -150,7 +140,7 @@ export const statsService = {
       overview: {
         total_products: totalProducts,
         total_orders: totalOrders,
-        total_users: totalUsers + totalCustomers,
+        total_users: totalUsers,
         total_revenue: revenueAgg._sum.amount ?? 0
       },
       chart
@@ -232,13 +222,6 @@ export const statsService = {
             fullName: true,
             email: true,
             avatar: true
-          }
-        },
-        customer: {
-          select: {
-            id: true,
-            fullName: true,
-            phone: true
           }
         },
         items: {

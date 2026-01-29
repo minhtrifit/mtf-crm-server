@@ -61,7 +61,6 @@ export const paymentService = {
           order: {
             include: {
               user: true,
-              customer: true,
               payments: true
             }
           }

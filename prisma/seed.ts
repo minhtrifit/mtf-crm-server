@@ -94,20 +94,6 @@ async function main() {
     }
   ];
 
-  const customers = [];
-
-  for (let i = 0; i < 100; i++) {
-    const firstName = faker.person.firstName();
-    const lastName = faker.person.lastName();
-
-    customers.push({
-      fullName: `${lastName} ${firstName}`,
-      phone: '0' + faker.string.numeric(9),
-      email: faker.internet.email().toLowerCase(),
-      address: faker.location.streetAddress()
-    });
-  }
-
   // Seed user
   await prisma.user.createMany({
     data: [...baseUsers, ...generatedUsers],
@@ -118,12 +104,6 @@ async function main() {
   await prisma.category.createMany({
     data: categories,
     skipDuplicates: true // tránh lỗi unique khi seed lại
-  });
-
-  // Seed customer
-  await prisma.customer.createMany({
-    data: customers,
-    skipDuplicates: true // tránh lỗi trùng phone
   });
 
   console.log('✅ Seed successfully');

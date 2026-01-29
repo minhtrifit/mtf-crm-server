@@ -56,19 +56,6 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model Customer {
-  id        String   @id @default(uuid())
-  fullName  String
-  phone     String   @unique
-  email     String?
-  address   String
-
-  orders    Order[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Category {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -150,12 +137,8 @@ model Order {
   deliveryStatus    DeliveryStatus @default(ORDERED)
 
   // Website order
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id])
-
-  // Admin order
-  customerId  String?
-  customer    Customer?   @relation(fields: [customerId], references: [id])
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
 
   items       OrderItem[]
   payments    Payment[]
@@ -164,7 +147,6 @@ model Order {
   updatedAt   DateTime    @updatedAt
 
   @@index([userId])
-  @@index([customerId])
 }
 
 model OrderItem {

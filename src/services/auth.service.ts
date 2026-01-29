@@ -32,13 +32,6 @@ export const authService = {
       });
 
       if (existedPhone) throw new Error(AuthError.PHONE_EXISTED);
-
-      // Find customer with phone
-      const existedCustomerPhone = await prisma.customer.findUnique({
-        where: { phone: phone }
-      });
-
-      if (existedCustomerPhone) throw new Error(AuthError.PHONE_EXISTED);
     }
 
     // Hash user password

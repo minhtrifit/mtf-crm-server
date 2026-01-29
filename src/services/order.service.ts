@@ -19,8 +19,6 @@ import {
 } from '@/models/Order';
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/Payment';
-import { CustomerPayload } from '@/models/Customer';
-import { customerService } from './customer.service';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -77,15 +75,6 @@ export const orderService = {
                 { email: { contains: q, mode: 'insensitive' } }
               ]
             }
-          },
-          {
-            customer: {
-              OR: [
-                { fullName: { contains: q, mode: 'insensitive' } },
-                { phone: { contains: q, mode: 'insensitive' } },
-                { email: { contains: q, mode: 'insensitive' } }
-              ]
-            }
           }
         ]
       }),
@@ -93,15 +82,6 @@ export const orderService = {
         OR: [
           {
             user: {
-              OR: [
-                { fullName: { contains: buyerQ, mode: 'insensitive' } },
-                { phone: { contains: buyerQ, mode: 'insensitive' } },
-                { email: { contains: buyerQ, mode: 'insensitive' } }
-              ]
-            }
-          },
-          {
-            customer: {
               OR: [
                 { fullName: { contains: buyerQ, mode: 'insensitive' } },
                 { phone: { contains: buyerQ, mode: 'insensitive' } },
@@ -158,15 +138,6 @@ export const orderService = {
           { note: { contains: q, mode: 'insensitive' } },
           {
             user: {
-              OR: [
-                { fullName: { contains: q, mode: 'insensitive' } },
-                { phone: { contains: q, mode: 'insensitive' } },
-                { email: { contains: q, mode: 'insensitive' } }
-              ]
-            }
-          },
-          {
-            customer: {
               OR: [
                 { fullName: { contains: q, mode: 'insensitive' } },
                 { phone: { contains: q, mode: 'insensitive' } },
@@ -277,15 +248,6 @@ export const orderService = {
         OR: [
           {
             user: {
-              OR: [
-                { fullName: { contains: buyerQ, mode: 'insensitive' } },
-                { phone: { contains: buyerQ, mode: 'insensitive' } },
-                { email: { contains: buyerQ, mode: 'insensitive' } }
-              ]
-            }
-          },
-          {
-            customer: {
               OR: [
                 { fullName: { contains: buyerQ, mode: 'insensitive' } },
                 { phone: { contains: buyerQ, mode: 'insensitive' } },
@@ -439,22 +401,6 @@ export const orderService = {
         data: newPayment
       });
 
-      // Create new user if not ready exist
-      const customer = await customerService.getByPhone(phone);
-
-      if (!customer) {
-        const newCustomer: CustomerPayload = {
-          fullName: existedUser.fullName,
-          phone: phone,
-          email: existedUser.email,
-          address: existedUser.address ?? ''
-        };
-
-        await prisma.customer.create({
-          data: newCustomer
-        });
-      }
-
       const result = await tx.order.findUnique({
         where: { id: createdOrder.id },
         include: {
@@ -578,22 +524,6 @@ export const orderService = {
               decrement: item.quantity
             }
           }
-        });
-      }
-
-      // Create new user if not ready exist
-      const customer = await customerService.getByPhone(phone);
-
-      if (!customer) {
-        const newCustomer: CustomerPayload = {
-          fullName: existedUser.fullName,
-          phone: phone,
-          email: existedUser.email,
-          address: existedUser.address ?? ''
-        };
-
-        await prisma.customer.create({
-          data: newCustomer
         });
       }
 
@@ -828,22 +758,6 @@ export const orderService = {
       await tx.payment.create({
         data: newPayment
       });
-
-      // Create new user if not ready exist
-      const customer = await customerService.getByPhone(phone);
-
-      if (!customer) {
-        const newCustomer: CustomerPayload = {
-          fullName: existedUser.fullName,
-          phone: phone,
-          email: existedUser.email,
-          address: existedUser.address ?? ''
-        };
-
-        await prisma.customer.create({
-          data: newCustomer
-        });
-      }
 
       const result = await tx.order.findUnique({
         where: { id: createdOrder.id },
