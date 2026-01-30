@@ -19,6 +19,8 @@ import {
 } from '@/models/Order';
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/Payment';
+import { socketEmit } from '@/sockets/socket.emitter';
+import { NotificationType } from '@/models/Category';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -431,6 +433,23 @@ export const orderService = {
 
     // logger
     logger.info('[CREATED COD ORDER]', order);
+
+    // Create notification
+    const notification = await prisma.notification.create({
+      data: {
+        type: NotificationType.ORDER,
+        itemId: order?.id,
+        message_vi: 'Bạn có đơn hàng mới',
+        message_en: 'You have new order'
+      }
+    });
+
+    // Send order event
+    socketEmit.toAdmin('order:new', {
+      message_vi: 'Bạn có đơn hàng mới',
+      message_en: 'You have new order',
+      data: notification
+    });
 
     return {
       order,

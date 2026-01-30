@@ -1,7 +1,11 @@
 import { Server, Socket } from 'socket.io';
+import { initSocketEmitter } from './socket.emitter';
 import { registerOrderEvents } from './order.socket';
 
 export const registerSocketEvents = (io: Server) => {
+  // Init emitter
+  initSocketEmitter(io);
+
   io.on('connection', (socket: Socket) => {
     console.log('Socket client connected:', socket.id);
 

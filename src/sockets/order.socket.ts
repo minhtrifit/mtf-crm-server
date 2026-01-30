@@ -1,5 +1,5 @@
-import { Role } from '@/models/User';
 import { Server, Socket } from 'socket.io';
+import { Role } from '@/models/User';
 
 export const registerOrderEvents = (io: Server, socket: Socket) => {
   socket.on('join', ({ role, tableId }) => {
@@ -19,27 +19,4 @@ export const registerOrderEvents = (io: Server, socket: Socket) => {
       });
     }
   });
-
-  // Backend: Send order to Admin
-  // io.to('admin').emit('order:new', {
-  //   orderId,
-  //   tableId,
-  //   items
-  // });
-
-  // Backend: Send order status to User
-  // io.to(`table:${tableId}`).emit('order:update', {
-  //   orderId,
-  //   status: 'CONFIRMED'
-  // });
-
-  // Frontend: Admin
-  // socket.on('order:new', (order) => {
-  //   // hiển thị order mới
-  // });
-
-  // Frontend: User
-  // socket.on('order:update', (data) => {
-  //   // cập nhật trạng thái món
-  // });
 };
