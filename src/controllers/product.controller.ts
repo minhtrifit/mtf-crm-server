@@ -227,14 +227,30 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
 export const getReviews = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;
+
+    const result = await productService.getReviews(req.validatedQuery);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('product.get_review_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getReviewsByProductId = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
     const { id } = req.validatedParams;
 
-    const reviews = await productService.getReviews(id, req.validatedQuery);
+    const reviews = await productService.getReviewsByProductId(id, req.validatedQuery);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: reviews,
-      message: t('product.get_review_successfully')
+      message: t('product.get_review_by_product_id_successfully')
     });
   } catch (error: any) {
     const { t } = req;
@@ -303,6 +319,38 @@ export const createReview = async (req: Request, res: Response, next: NextFuncti
           success: false,
           message: t('product.review_already')
         });
+
+      default:
+        next(error);
+    }
+  }
+};
+
+export const deleteReview = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const { id } = req.validatedParams;
+
+    const reviews = await productService.deleteReview(id);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: reviews,
+      message: t('product.delete_review_successfully')
+    });
+  } catch (error: any) {
+    const { t } = req;
+
+    switch (error.message) {
+      case ProductError.REVIEW_NOT_FOUND: {
+        const reviewId = error.data.reviewId ?? '';
+
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('order.product_stock_not_enough', { reviewId: reviewId })
+        });
+      }
 
       default:
         next(error);

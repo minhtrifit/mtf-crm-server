@@ -31,6 +31,14 @@ export interface ProductReviewPayload {
   imagesUrl: string[];
 }
 
+export interface GetReviewsParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  productId?: string;
+  rate?: number;
+}
+
 export interface GetProductsReviewsParams {
   rate?: number;
 }

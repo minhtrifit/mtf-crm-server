@@ -7,11 +7,13 @@ import {
   CreateReviewSchema,
   CreateSchema,
   CreateSearchKeywordSchema,
+  DeleteReviewParamsSchema,
   GetBySlugParamsSchema,
   GetCheckIsReviewedQuerySchema,
   GetParamsSchema,
   GetQuerySchema,
   GetReviewQuerySchema,
+  GetReviewsQuerySchema,
   GetSearchKeywordQuerySchema,
   GetShowcaseByCategorySlugParamsSchema,
   GetShowcaseByCategorySlugQuerySchema,
@@ -26,11 +28,13 @@ import {
   getProductBySlug,
   getAllProducts,
   createReview,
-  getReviews,
   getWebsiteSearchProducts,
   createSearchKeyword,
   getSearchKeywords,
-  checkIsReviewd
+  checkIsReviewd,
+  getReviewsByProductId,
+  getReviews,
+  deleteReview
 } from '@/controllers/product.controller';
 import { validateBody } from '@/middlewares/validate.middleware';
 
@@ -49,14 +53,33 @@ router.get(
 router.get('/all', authenticateHandler, authorizeHandler(Role.ADMIN), getAllProducts);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(CreateSchema), createProduct);
 router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(UpdateSchema), updateProduct);
-router.get('/reviews/:id', validateQuery(GetReviewQuerySchema), validateParams(GetParamsSchema), getReviews);
 router.get(
-  '/check-is-reviewed/:id',
+  '/reviews',
+  authenticateHandler,
+  authorizeHandler(Role.ADMIN),
+  validateQuery(GetReviewsQuerySchema),
+  getReviews
+);
+router.get(
+  '/reviews/detail/:id',
+  validateQuery(GetReviewQuerySchema),
+  validateParams(GetParamsSchema),
+  getReviewsByProductId
+);
+router.get(
+  '/reviews/check-is-reviewed/:id',
   validateQuery(GetCheckIsReviewedQuerySchema),
   validateParams(GetParamsSchema),
   checkIsReviewd
 );
-router.post('/create-review', authenticateHandler, validateBody(CreateReviewSchema), createReview);
+router.post('/reviews/create', authenticateHandler, validateBody(CreateReviewSchema), createReview);
+router.delete(
+  '/reviews/delete/:id',
+  authenticateHandler,
+  authorizeHandler(Role.ADMIN),
+  validateParams(DeleteReviewParamsSchema),
+  deleteReview
+);
 router.get('/search-keywords', validateQuery(GetSearchKeywordQuerySchema), getSearchKeywords);
 router.post('/create-search-keyword', validateBody(CreateSearchKeywordSchema), createSearchKeyword);
 

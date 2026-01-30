@@ -55,6 +55,14 @@ export const UpdateSchema = Joi.object({
   categoryId: Joi.string().min(1).optional()
 });
 
+export const GetReviewsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  q: Joi.string().trim().allow('').optional(),
+  productId: Joi.string().trim().allow('').optional(),
+  rate: Joi.number().integer().min(1).max(5).allow('').optional()
+});
+
 export const CreateReviewSchema = Joi.object({
   productId: Joi.string().trim().required(),
   rating: Joi.number().positive().required(),
@@ -68,6 +76,10 @@ export const GetReviewQuerySchema = Joi.object({
 
 export const GetCheckIsReviewedQuerySchema = Joi.object({
   userId: Joi.string().trim().allow('').optional()
+});
+
+export const DeleteReviewParamsSchema = Joi.object({
+  id: Joi.string().trim().required()
 });
 
 export const GetSearchKeywordQuerySchema = Joi.object({

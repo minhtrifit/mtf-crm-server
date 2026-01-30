@@ -3,11 +3,13 @@ import {
   GetKeywordsParams,
   GetProductsParams,
   GetProductsReviewsParams,
+  GetReviewsParams,
   ProductBase,
   ProductReviewPayload,
   SearchKeywordPayload
 } from '@/models/Product';
-import { PagingType } from '@/models';
+import { HttpError, PagingType } from '@/models';
+import { HTTP_STATUS } from '@/constants/http-status-code';
 
 export enum ProductError {
   NOT_FOUND = 'PRODUCT_NOT_FOUND',
@@ -16,7 +18,8 @@ export enum ProductError {
   NAME_EXISTED = 'PRODUCT_NAME_EXISTED',
   SLUG_EXISTED = 'PRODUCT_SLUG_EXISTED',
   SKU_EXISTED = 'PRODUCT_SKU_EXISTED',
-  REVIEW_EXISTED = 'PRODUCT_REVIEW_EXISTED'
+  REVIEW_EXISTED = 'PRODUCT_REVIEW_EXISTED',
+  REVIEW_NOT_FOUND = 'REVIEW_NOT_FOUND'
 }
 
 export const productService = {
@@ -372,7 +375,72 @@ export const productService = {
     });
   },
 
-  async getReviews(id: string, params: GetProductsReviewsParams) {
+  async getReviews(params: GetReviewsParams) {
+    const page = Math.max(Number(params.page) || 1, 1);
+    const limit = Math.min(Number(params.limit) || 10, 100);
+    const skip = (page - 1) * limit;
+
+    const q = params.q?.trim();
+    const productId = params.productId?.trim();
+    const rate = Number(params.rate) || '';
+
+    const where: any = {
+      ...(productId && { productId }),
+      ...(rate && { rating: rate }),
+      ...(q && {
+        OR: [
+          {
+            comment: { contains: q, mode: 'insensitive' }
+          },
+          {
+            product: {
+              name: { contains: q, mode: 'insensitive' }
+            }
+          },
+          {
+            product: {
+              slug: { contains: q, mode: 'insensitive' }
+            }
+          },
+          {
+            user: {
+              email: { contains: q, mode: 'insensitive' }
+            }
+          },
+          {
+            user: {
+              fullName: { contains: q, mode: 'insensitive' }
+            }
+          }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.review.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: {
+          user: true,
+          product: true
+        }
+      }),
+      prisma.review.count({ where })
+    ]);
+
+    const paging: PagingType = {
+      current_page: page,
+      total_item: data.length,
+      total_page: Math.ceil(total / limit),
+      total
+    };
+
+    return { data, paging };
+  },
+
+  async getReviewsByProductId(id: string, params: GetProductsReviewsParams) {
     const rate = Number(params.rate) || '';
 
     // Find product
@@ -495,6 +563,19 @@ export const productService = {
     });
 
     return true;
+  },
+
+  async deleteReview(id: string) {
+    const review = await prisma.review.findUnique({ where: { id } });
+
+    if (!review)
+      throw new HttpError(ProductError.REVIEW_NOT_FOUND, HTTP_STATUS.BAD_REQUEST, {
+        reviewId: id
+      });
+
+    return prisma.review.delete({
+      where: { id }
+    });
   },
 
   async getKeywords(params: GetKeywordsParams) {

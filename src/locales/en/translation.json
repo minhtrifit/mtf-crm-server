@@ -52,12 +52,15 @@
     "create_successfully": "Create product successfully",
     "update_successfully": "Update product successfully",
     "slug_required": "Slug is required",
-    "get_review_successfully": "Get product reviews successfully",
+    "get_review_successfully": "Get reviews successfully",
+    "get_review_by_product_id_successfully": "Get product reviews successfully",
     "create_review_successfully": "Review product successfully",
     "review_already": "User already reviewed product",
     "get_search_keyword_successfully": "Get search keyword list successfully",
     "create_search_keyword_successfully": "Create search keyword successfully",
-    "check_is_user_reviewed_successfully": "Check is user reviewd successfully"
+    "check_is_user_reviewed_successfully": "Check is user reviewd successfully",
+    "review_not_found": "Review {{ reviewId }} not found",
+    "delete_review_successfully": "Delete review successfully"
   },
   "order": {
     "get_list_successfully": "Get orders successfully",
