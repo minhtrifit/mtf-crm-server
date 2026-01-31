@@ -15,7 +15,3 @@ export interface CategoryBase {
 export interface Category extends CategoryBase {
   id: string;
 }
-
-export enum NotificationType {
-  ORDER = 'ORDER'
-}

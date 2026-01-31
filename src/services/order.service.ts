@@ -20,7 +20,7 @@ import {
 import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/Payment';
 import { socketEmit } from '@/sockets/socket.emitter';
-import { NotificationType } from '@/models/Category';
+import { NotificationType } from '@/models/Notification';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -666,6 +666,23 @@ export const orderService = {
       // logger
       logger.info('[CREATED VNPAY ORDER]', orderResult);
     }
+
+    // Create notification
+    const notification = await prisma.notification.create({
+      data: {
+        type: NotificationType.ORDER,
+        itemId: orderId,
+        message_vi: 'Bạn có đơn hàng mới',
+        message_en: 'You have new order'
+      }
+    });
+
+    // Send order event
+    socketEmit.toAdmin('order:new', {
+      message_vi: 'Bạn có đơn hàng mới',
+      message_en: 'You have new order',
+      data: notification
+    });
 
     return `${clientUrl}/${clientCheckoutReturnPathname}&order_id=${vnpParams.vnp_TxnRef}&method=${PaymentMethod.VNPAY}&vnpResponseCode=${vnpResponseCode}`;
   },

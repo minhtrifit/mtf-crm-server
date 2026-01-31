@@ -100,5 +100,12 @@
     "get_delivery_status_successfully": "Get delivery stats successfully",
     "get_top_selling_product_successfully": "Get top selling products successfully",
     "get_recent_order_successfully": "Get recent orders successfully"
+  },
+  "notification": {
+    "is_required": "Notification ID is required",
+    "get_list_successfully": "Get notification list successfully",
+    "update_successfully": "Update notification successfully",
+    "not_found": "Notification not found",
+    "is_existed": "Notification is existed"
   }
 }

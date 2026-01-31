@@ -100,5 +100,12 @@
     "get_delivery_status_successfully": "Lấy thống kê giao hàng thành công",
     "get_top_selling_product_successfully": "Lấy danh sách sản phẩm bán chạy thành công",
     "get_recent_order_successfully": "Lấy đơn hàng gần nhất thành công"
+  },
+  "notification": {
+    "is_required": "Vui lòng chọn mã thông báo",
+    "get_list_successfully": "Lấy danh sách thông báo thành công",
+    "update_successfully": "Cập nhật thông báo thành công",
+    "not_found": "Không tìm thấy thông báo",
+    "is_existed": "Thông báo đã tồn tại"
   }
 }

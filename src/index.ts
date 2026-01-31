@@ -20,6 +20,7 @@ import orderRoutes from './routes/order.router';
 import paymentRoutes from './routes/payment.router';
 import websiteTemplateRoutes from './routes/website_template.router';
 import statsRoutes from './routes/stats.router';
+import notificationRoutes from './routes/notification.router';
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.use('/api/order', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/website-template', websiteTemplateRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/notification', notificationRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);
