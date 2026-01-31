@@ -99,6 +99,12 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
           message: t('user.user_not_found')
         });
 
+      case OrderError.PHONE_REGISTERED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('order.phone_registered')
+        });
+
       case OrderError.PRODUCT_NOT_FOUND: {
         const invalidProductIds = error.data.invalidProductIds ?? [];
 
@@ -154,6 +160,12 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
         return res.status(HTTP_STATUS.NOT_FOUND).json({
           success: false,
           message: t('user.user_not_found')
+        });
+
+      case OrderError.PHONE_REGISTERED:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: t('order.phone_registered')
         });
 
       case OrderError.PRODUCT_NOT_FOUND: {

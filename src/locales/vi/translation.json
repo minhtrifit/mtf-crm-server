@@ -74,7 +74,8 @@
     "order_payment_id": "Thanh toán đơn hàng {{ orderId }}",
     "payment_not_found": "Không tìm thấy thông tin thanh toán",
     "get_order_payment_successfully": "Lấy thông tin thanh toán đơn hàng thành công",
-    "product_stock_not_enough": "Sản phẩm {{ productId }} Không đủ tồn kho"
+    "product_stock_not_enough": "Sản phẩm {{ productId }} Không đủ tồn kho",
+    "phone_registered": "Số điện thoại đã được đăng ký"
   },
   "payment": {
     "is_required": "Vui lòng chọn mã thanh toán",

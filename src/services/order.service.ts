@@ -30,7 +30,8 @@ export enum OrderError {
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
   PAYMENT_NOT_FOUND = 'PAYMENT_NOT_FOUND',
   PRODUCT_STOCK_NOT_ENOUGH = 'PRODUCT_STOCK_NOT_ENOUGH',
-  NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION'
+  NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION',
+  PHONE_REGISTERED = 'PHONE_REGISTERED'
 }
 
 export const orderService = {
@@ -305,8 +306,28 @@ export const orderService = {
       where: { id: userId }
     });
 
-    if (!existedUser) {
-      throw new Error(OrderError.USER_NOT_FOUND);
+    if (!existedUser) throw new Error(OrderError.USER_NOT_FOUND);
+
+    // Find user with phone
+    const userRegistedPhone = await prisma.user.findFirst({
+      where: {
+        phone: phone,
+        NOT: {
+          id: userId
+        }
+      }
+    });
+
+    if (userRegistedPhone) throw new Error(OrderError.PHONE_REGISTERED);
+
+    // Update user phone
+    if (!existedUser.phone) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          phone: phone
+        }
+      });
     }
 
     // Find products with productId
@@ -351,81 +372,86 @@ export const orderService = {
     //    có Order ❌ nhưng không có Payment
     //    có Payment ❌ nhưng không có OrderItems
 
-    const order = await prisma.$transaction(async (tx) => {
-      // Create order
-      const newOrder: OrderPayload = {
-        orderCode: `${Date.now()}`,
-        userId,
-        phone,
-        deliveryAddress,
-        note,
-        totalAmount,
-        items: {
-          create: orderItems
-        }
-      };
+    const order = await prisma.$transaction(
+      async (tx) => {
+        // Create order
+        const newOrder: OrderPayload = {
+          orderCode: `${Date.now()}`,
+          userId,
+          phone,
+          deliveryAddress,
+          note,
+          totalAmount,
+          items: {
+            create: orderItems
+          }
+        };
 
-      const createdOrder = await tx.order.create({
-        data: newOrder
-      });
-
-      // Update product stock
-      for (const item of orderItems) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true }
+        const createdOrder = await tx.order.create({
+          data: newOrder
         });
 
-        if (!product || product.stock < item.quantity) {
-          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
-            productId: item.productId
+        // Update product stock
+        for (const item of orderItems) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { stock: true }
+          });
+
+          if (!product || product.stock < item.quantity) {
+            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+              productId: item.productId
+            });
+          }
+
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity
+              }
+            }
           });
         }
 
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
+        // Create payment
+        const newPayment: PaymentPayload = {
+          orderId: createdOrder.id,
+          amount: totalAmount,
+          method: PaymentMethod.COD
+        };
+
+        await tx.payment.create({
+          data: newPayment
+        });
+
+        const result = await tx.order.findUnique({
+          where: { id: createdOrder.id },
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                address: true
+              }
+            },
+            items: {
+              include: {
+                product: true
+              }
+            },
+            payments: true
           }
         });
+
+        return result;
+      },
+      {
+        timeout: 15000 // 15s
       }
-
-      // Create payment
-      const newPayment: PaymentPayload = {
-        orderId: createdOrder.id,
-        amount: totalAmount,
-        method: PaymentMethod.COD
-      };
-
-      await tx.payment.create({
-        data: newPayment
-      });
-
-      const result = await tx.order.findUnique({
-        where: { id: createdOrder.id },
-        include: {
-          user: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              phone: true,
-              address: true
-            }
-          },
-          items: {
-            include: {
-              product: true
-            }
-          },
-          payments: true
-        }
-      });
-
-      return result;
-    });
+    );
 
     if (!order) {
       throw new Error(OrderError.CREATED_FAILED);
@@ -465,8 +491,28 @@ export const orderService = {
       where: { id: userId }
     });
 
-    if (!existedUser) {
-      throw new Error(OrderError.USER_NOT_FOUND);
+    if (!existedUser) throw new Error(OrderError.USER_NOT_FOUND);
+
+    // Find user with phone
+    const userRegistedPhone = await prisma.user.findFirst({
+      where: {
+        phone: phone,
+        NOT: {
+          id: userId
+        }
+      }
+    });
+
+    if (userRegistedPhone) throw new Error(OrderError.PHONE_REGISTERED);
+
+    // Update user phone
+    if (!existedUser.phone) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          phone: phone
+        }
+      });
     }
 
     // Find products with productId
@@ -505,49 +551,54 @@ export const orderService = {
     const totalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
 
     // Transaction
-    const order = await prisma.$transaction(async (tx) => {
-      // Create order
-      const newOrder: OrderPayload = {
-        orderCode: `${Date.now()}`,
-        userId,
-        phone,
-        deliveryAddress,
-        note,
-        totalAmount,
-        items: {
-          create: orderItems
-        }
-      };
+    const order = await prisma.$transaction(
+      async (tx) => {
+        // Create order
+        const newOrder: OrderPayload = {
+          orderCode: `${Date.now()}`,
+          userId,
+          phone,
+          deliveryAddress,
+          note,
+          totalAmount,
+          items: {
+            create: orderItems
+          }
+        };
 
-      const createdOrder = await tx.order.create({
-        data: newOrder
-      });
-
-      // Update product stock
-      for (const item of orderItems) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true }
+        const createdOrder = await tx.order.create({
+          data: newOrder
         });
 
-        if (!product || product.stock < item.quantity) {
-          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
-            productId: item.productId
+        // Update product stock
+        for (const item of orderItems) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { stock: true }
+          });
+
+          if (!product || product.stock < item.quantity) {
+            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+              productId: item.productId
+            });
+          }
+
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity
+              }
+            }
           });
         }
 
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
-          }
-        });
+        return createdOrder;
+      },
+      {
+        timeout: 15000 // 15s
       }
-
-      return createdOrder;
-    });
+    );
 
     if (!order) {
       throw new Error(OrderError.CREATED_FAILED);

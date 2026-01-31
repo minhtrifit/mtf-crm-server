@@ -74,7 +74,8 @@
     "order_payment_id": "Payment for order {{ orderId }}",
     "payment_not_found": "Payment not found",
     "get_order_payment_successfully": "Get order payment successfully",
-    "product_stock_not_enough": "Not enough product {{ productId }} stock"
+    "product_stock_not_enough": "Not enough product {{ productId }} stock",
+    "phone_registered": "Phone registered"
   },
   "payment": {
     "is_required": "Payment ID is required",
