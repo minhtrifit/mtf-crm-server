@@ -35,7 +35,7 @@ ADMIN_CODE=abc123
 MAX_UPLOAD_FILES=7
 DATABASE_URL=postgresql://postgresql:123456@localhost:5432/mtf_crm_db
 
-// VNPay config
+# VNPay config
 VNP_TMNCODE=3R8DRRZ6
 VNP_HASHSECRET=3SU4FHTN79BFVT46CN7M8OIHYKHK4A9K
 VNP_RETURN_URL=http://localhost:5000/api/order/result/vnpay
@@ -105,6 +105,14 @@ npm run prisma:reset
 npm run prisma:seed
 ```
 
+## 🐳 Run with Docker <a name="docker"></a>
+
+Buid & run app with **production** mode
+
+```console
+docker-compose up -d --build
+```
+
 ## 📦 Migrate Database <a name="migrate-database"></a>
 
 ### Run database with Docker
@@ -121,6 +129,12 @@ Import data (change **your_database_name**)
 
 ```console
 cmd /c "docker exec -i postgres_container psql -U postgresql -d your_database_name < data.sql"
+```
+
+Import data (**production** version)
+
+```console
+cmd /c "docker exec -i mtf-crm-database psql -U postgresql -d db < data.sql"
 ```
 
 ## 📝 API List<a name="api-list"></a>
