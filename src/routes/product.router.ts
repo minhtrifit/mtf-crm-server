@@ -53,13 +53,7 @@ router.get(
 router.get('/all', authenticateHandler, authorizeHandler(Role.ADMIN), getAllProducts);
 router.post('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(CreateSchema), createProduct);
 router.patch('/edit/:id', authenticateHandler, authorizeHandler(Role.ADMIN), validateBody(UpdateSchema), updateProduct);
-router.get(
-  '/reviews',
-  authenticateHandler,
-  authorizeHandler(Role.ADMIN),
-  validateQuery(GetReviewsQuerySchema),
-  getReviews
-);
+router.get('/reviews', validateQuery(GetReviewsQuerySchema), getReviews);
 router.get(
   '/reviews/detail/:id',
   validateQuery(GetReviewQuerySchema),
