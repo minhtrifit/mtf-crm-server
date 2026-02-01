@@ -296,7 +296,7 @@ export const orderService = {
   },
 
   async createCod(payload: OrderBody) {
-    const { userId, phone, deliveryAddress, note, items } = payload;
+    const { userId, fullName, phone, deliveryAddress, note, items } = payload;
 
     const clientUrl = process.env.CLIENT_URL!;
     const clientCheckoutReturnPathname = process.env.CLIENT_CHECKOUT_RETURN_PATHNAME!;
@@ -307,28 +307,6 @@ export const orderService = {
     });
 
     if (!existedUser) throw new Error(OrderError.USER_NOT_FOUND);
-
-    // Find user with phone
-    const userRegistedPhone = await prisma.user.findFirst({
-      where: {
-        phone: phone,
-        NOT: {
-          id: userId
-        }
-      }
-    });
-
-    if (userRegistedPhone) throw new Error(OrderError.PHONE_REGISTERED);
-
-    // Update user phone
-    if (!existedUser.phone) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          phone: phone
-        }
-      });
-    }
 
     // Find products with productId
     const productIds = items.map((i: { productId: string; quantity: number }) => i.productId);
@@ -378,6 +356,7 @@ export const orderService = {
         const newOrder: OrderPayload = {
           orderCode: `${Date.now()}`,
           userId,
+          fullName,
           phone,
           deliveryAddress,
           note,
@@ -484,7 +463,7 @@ export const orderService = {
   },
 
   async createVnPay(t: TFunction<'translation', undefined>, ipAddr: string, payload: OrderBody) {
-    const { userId, phone, deliveryAddress, note, items } = payload;
+    const { userId, fullName, phone, deliveryAddress, note, items } = payload;
 
     // Find user with userId
     const existedUser = await prisma.user.findUnique({
@@ -492,28 +471,6 @@ export const orderService = {
     });
 
     if (!existedUser) throw new Error(OrderError.USER_NOT_FOUND);
-
-    // Find user with phone
-    const userRegistedPhone = await prisma.user.findFirst({
-      where: {
-        phone: phone,
-        NOT: {
-          id: userId
-        }
-      }
-    });
-
-    if (userRegistedPhone) throw new Error(OrderError.PHONE_REGISTERED);
-
-    // Update user phone
-    if (!existedUser.phone) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          phone: phone
-        }
-      });
-    }
 
     // Find products with productId
     const productIds = items.map((i: { productId: string; quantity: number }) => i.productId);
@@ -557,6 +514,7 @@ export const orderService = {
         const newOrder: OrderPayload = {
           orderCode: `${Date.now()}`,
           userId,
+          fullName,
           phone,
           deliveryAddress,
           note,
@@ -739,7 +697,7 @@ export const orderService = {
   },
 
   async createAdmin(payload: AdminOrderBody) {
-    const { userId, amount, phone, deliveryAddress, note, method, status, deliveryStatus, items } = payload;
+    const { userId, amount, fullName, phone, deliveryAddress, note, method, status, deliveryStatus, items } = payload;
 
     // Find user with userId
     const existedUser = await prisma.user.findUnique({
@@ -797,6 +755,7 @@ export const orderService = {
       const newOrder: AdminOrderPayload = {
         orderCode: `${Date.now()}`,
         userId,
+        fullName,
         phone,
         deliveryAddress,
         note,
@@ -894,6 +853,7 @@ export const orderService = {
       const data: any = {};
 
       if (payload.note !== undefined) data.note = payload.note;
+      if (payload.fullName !== undefined) data.fullName = payload.fullName;
       if (payload.phone !== undefined) data.phone = payload.phone;
       if (payload.deliveryAddress !== undefined) data.deliveryAddress = payload.deliveryAddress;
       if (payload.status !== undefined) data.status = payload.status;

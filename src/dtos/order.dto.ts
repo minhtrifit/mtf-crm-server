@@ -30,6 +30,7 @@ export const GetParamsSchema = Joi.object({
 export const CreateSchema = Joi.object({
   userId: Joi.string().uuid().required(),
 
+  fullName: Joi.string().required(),
   phone: Joi.string().required(),
   deliveryAddress: Joi.string().required(),
   note: Joi.string().allow(''),
@@ -51,6 +52,7 @@ export const CreateAdminSchema = Joi.object({
   method: Joi.string()
     .valid(...paymentMethodValues)
     .required(),
+  fullName: Joi.string().required(),
   phone: Joi.string().required(),
   deliveryAddress: Joi.string().required(),
   note: Joi.string().allow(''),
@@ -73,6 +75,7 @@ export const CreateAdminSchema = Joi.object({
 
 export const UpdateSchema = Joi.object({
   note: Joi.string().allow('').optional(),
+  fullName: Joi.string().allow('').optional(),
   phone: Joi.string().allow('').optional(),
   deliveryAddress: Joi.string().allow('').optional(),
 
