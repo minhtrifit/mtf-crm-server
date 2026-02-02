@@ -108,5 +108,14 @@
     "update_successfully": "Update notification successfully",
     "not_found": "Notification not found",
     "is_existed": "Notification is existed"
+  },
+  "faq": {
+    "is_required": "Faq ID is required",
+    "get_list_successfully": "Get faq list successfully",
+    "get_detail_successfully": "Get faq successfully",
+    "create_successfully": "Create faq successfully",
+    "update_successfully": "Update faq successfully",
+    "not_found": "Faq not found",
+    "delete_successfully": "Delete faq successfully"
   }
 }

@@ -108,5 +108,14 @@
     "update_successfully": "Cập nhật thông báo thành công",
     "not_found": "Không tìm thấy thông báo",
     "is_existed": "Thông báo đã tồn tại"
+  },
+  "faq": {
+    "is_required": "Vui lòng chọn mã câu hỏi",
+    "get_list_successfully": "Lấy danh sách câu hỏi thành công",
+    "get_detail_successfully": "Lấy câu hỏi thành công",
+    "create_successfully": "Thêm mới câu hỏi thành công",
+    "update_successfully": "Cập nhật câu hỏi thành công",
+    "not_found": "Không tìm thấy câu hỏi",
+    "delete_successfully": "Xóa câu hỏi thành công"
   }
 }
