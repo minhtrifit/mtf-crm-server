@@ -352,59 +352,56 @@ export const orderService = {
 
     const order = await prisma.$transaction(
       async (tx) => {
-        // Create order
-        const newOrder: OrderPayload = {
-          orderCode: `${Date.now()}`,
-          userId,
-          fullName,
-          phone,
-          deliveryAddress,
-          note,
-          totalAmount,
-          items: {
-            create: orderItems
-          }
-        };
-
+        // 1. Create order
         const createdOrder = await tx.order.create({
-          data: newOrder
+          data: {
+            orderCode: `${Date.now()}`,
+            userId,
+            fullName,
+            phone,
+            deliveryAddress,
+            note,
+            totalAmount,
+            items: {
+              create: orderItems
+            }
+          }
         });
 
-        // Update product stock
+        // 2. Update stock (atomic)
         for (const item of orderItems) {
-          const product = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true }
-          });
-
-          if (!product || product.stock < item.quantity) {
-            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
-              productId: item.productId
-            });
-          }
-
-          await tx.product.update({
-            where: { id: item.productId },
+          const updated = await tx.product.updateMany({
+            where: {
+              id: item.productId,
+              stock: {
+                gte: item.quantity
+              }
+            },
             data: {
               stock: {
                 decrement: item.quantity
               }
             }
           });
+
+          if (updated.count === 0) {
+            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+              productId: item.productId
+            });
+          }
         }
 
-        // Create payment
-        const newPayment: PaymentPayload = {
-          orderId: createdOrder.id,
-          amount: totalAmount,
-          method: PaymentMethod.COD
-        };
-
+        // 3. Create payment
         await tx.payment.create({
-          data: newPayment
+          data: {
+            orderId: createdOrder.id,
+            amount: totalAmount,
+            method: PaymentMethod.COD
+          }
         });
 
-        const result = await tx.order.findUnique({
+        // 4. Return full order
+        return tx.order.findUnique({
           where: { id: createdOrder.id },
           include: {
             user: {
@@ -424,12 +421,8 @@ export const orderService = {
             payments: true
           }
         });
-
-        return result;
       },
-      {
-        timeout: 15000 // 15s
-      }
+      { timeout: 15000 }
     );
 
     if (!order) {
@@ -510,7 +503,7 @@ export const orderService = {
     // Transaction
     const order = await prisma.$transaction(
       async (tx) => {
-        // Create order
+        // 1. Create order
         const newOrder: OrderPayload = {
           orderCode: `${Date.now()}`,
           userId,
@@ -528,27 +521,27 @@ export const orderService = {
           data: newOrder
         });
 
-        // Update product stock
+        // 2. Update product stock (atomic)
         for (const item of orderItems) {
-          const product = await tx.product.findUnique({
-            where: { id: item.productId },
-            select: { stock: true }
-          });
-
-          if (!product || product.stock < item.quantity) {
-            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
-              productId: item.productId
-            });
-          }
-
-          await tx.product.update({
-            where: { id: item.productId },
+          const updated = await tx.product.updateMany({
+            where: {
+              id: item.productId,
+              stock: {
+                gte: item.quantity
+              }
+            },
             data: {
               stock: {
                 decrement: item.quantity
               }
             }
           });
+
+          if (updated.count === 0) {
+            throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+              productId: item.productId
+            });
+          }
         }
 
         return createdOrder;
@@ -751,7 +744,7 @@ export const orderService = {
     //    có Payment ❌ nhưng không có OrderItems
 
     const order = await prisma.$transaction(async (tx) => {
-      // Create order
+      // 1. Create order
       const newOrder: AdminOrderPayload = {
         orderCode: `${Date.now()}`,
         userId,
@@ -771,41 +764,42 @@ export const orderService = {
         data: newOrder
       });
 
-      // Update product stock
+      // 2. Update product stock (atomic)
       for (const item of orderItems) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true }
-        });
-
-        if (!product || product.stock < item.quantity) {
-          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
-            productId: item.productId
-          });
-        }
-
-        await tx.product.update({
-          where: { id: item.productId },
+        const updated = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            stock: {
+              gte: item.quantity
+            }
+          },
           data: {
             stock: {
               decrement: item.quantity
             }
           }
         });
+
+        if (updated.count === 0) {
+          throw new HttpError(OrderError.PRODUCT_STOCK_NOT_ENOUGH, HTTP_STATUS.BAD_REQUEST, {
+            productId: item.productId
+          });
+        }
       }
 
-      // Create payment
+      // 3. Create payment
       const newPayment: PaymentPayload = {
         orderId: createdOrder.id,
-        amount: amount,
-        method: method
+        amount,
+        method
       };
 
       await tx.payment.create({
         data: newPayment
       });
 
-      const result = await tx.order.findUnique({
+      // 4. Return full order
+      return tx.order.findUnique({
         where: { id: createdOrder.id },
         include: {
           user: {
@@ -825,8 +819,6 @@ export const orderService = {
           payments: true
         }
       });
-
-      return result;
     });
 
     if (!order) {
