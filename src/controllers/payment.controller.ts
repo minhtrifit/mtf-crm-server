@@ -18,6 +18,31 @@ export const getPayments = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const getPayment = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const { id } = req.validatedParams;
+
+    const payment = await paymentService.getById(id);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: payment,
+      message: t('payment.get_detail_successfully')
+    });
+  } catch (error: any) {
+    if (error.message === PaymentError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('payment.not_found')
+      });
+    }
+
+    next(error);
+  }
+};
+
 export const createPayment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

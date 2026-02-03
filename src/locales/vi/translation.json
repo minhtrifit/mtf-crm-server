@@ -80,7 +80,8 @@
   "payment": {
     "is_required": "Vui lòng chọn mã thanh toán",
     "not_found": "Không tìm thấy thanh toán",
-    "get_list_successfully": "Lấy lịch sử thanh toán thành công",
+    "get_list_successfully": "Lấy danh sách lịch sử thanh toán thành công",
+    "get_detail_successfully": "Lấy lịch sử thanh toán thành công",
     "create_successfully": "Tạo thanh toán thành công",
     "update_successfully": "Cập nhật thanh toán thành công"
   },

@@ -18,6 +18,10 @@ export const GetQuerySchema = Joi.object({
   toPaidTime: Joi.string().trim().allow('').optional()
 });
 
+export const GetParamsSchema = Joi.object({
+  id: Joi.string().trim().required()
+});
+
 export const CreateSchema = Joi.object({
   orderId: Joi.string().required(),
   amount: Joi.number().positive().required(),

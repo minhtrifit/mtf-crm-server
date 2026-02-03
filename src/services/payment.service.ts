@@ -79,6 +79,36 @@ export const paymentService = {
     return { data, paging };
   },
 
+  async getById(id: string) {
+    const payment = await prisma.payment.findUnique({
+      where: { id },
+      include: {
+        order: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                address: true
+              }
+            },
+            items: {
+              include: {
+                product: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!payment) throw new Error(PaymentError.NOT_FOUND);
+
+    return payment;
+  },
+
   async create(payload: PaymentPayload) {
     const { orderId, amount, method } = payload;
 

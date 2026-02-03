@@ -80,7 +80,8 @@
   "payment": {
     "is_required": "Payment ID is required",
     "not_found": "Payment not found",
-    "get_list_successfully": "Get payment history successfully",
+    "get_list_successfully": "Get payments history successfully",
+    "get_detail_successfully": "Get payment history successfully",
     "create_successfully": "Create payment successfully",
     "update_successfully": "Update payment successfully"
   },
