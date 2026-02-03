@@ -1,3 +1,11 @@
+export enum MediaType {
+  FACEBOOK = 'FACEBOOK',
+  INSTAGRAM = 'INSTAGRAM',
+  YOUTUBE = 'YOUTUBE',
+  ZALO = 'ZALO',
+  TELEGRAM = 'TELEGRAM'
+}
+
 export interface GetWebsiteTemplatesParams {
   page?: number;
   limit?: number;
@@ -11,6 +19,11 @@ export interface SectionType {
   items: { productId: string; position: number }[];
 }
 
+export interface MediaItemType {
+  type: MediaType;
+  url: string;
+}
+
 export interface WebsiteTemplateBase {
   name: string;
   primaryColor: string;
@@ -20,6 +33,7 @@ export interface WebsiteTemplateBase {
   phone: string;
   footerDescription: string;
   isActive: boolean;
+  medias: MediaItemType[];
   sections: SectionType[];
 }
 

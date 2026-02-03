@@ -1,4 +1,7 @@
 import Joi from 'joi';
+import { MediaType } from '@/models/WebsiteTemplate';
+
+const mediaValues = Object.values(MediaType);
 
 export const GetQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
@@ -9,6 +12,15 @@ export const GetQuerySchema = Joi.object({
 
 export const GetParamsSchema = Joi.object({
   id: Joi.string().trim().required()
+});
+
+const MediaSchema = Joi.object({
+  id: Joi.string().uuid().optional(),
+  type: Joi.string()
+    .valid(...mediaValues)
+    .allow('')
+    .optional(),
+  url: Joi.string().allow('').optional()
 });
 
 const SectionSchema = Joi.object({
@@ -36,6 +48,7 @@ export const CreateSchema = Joi.object({
   phone: Joi.string().allow('').optional(),
   footerDescription: Joi.string().allow('').optional(),
   isActive: Joi.boolean().required(),
+  medias: Joi.array().items(MediaSchema),
   sections: Joi.array().items(SectionSchema)
 });
 
@@ -48,5 +61,6 @@ export const UpdateSchema = Joi.object({
   phone: Joi.string().allow('').optional(),
   footerDescription: Joi.string().allow('').optional(),
   isActive: Joi.boolean().optional(),
+  medias: Joi.array().items(MediaSchema),
   sections: Joi.array().items(SectionSchema)
 });

@@ -102,6 +102,7 @@ export const websiteTemplateService = {
     const template = await prisma.websiteTemplate.findUnique({
       where: { id },
       include: {
+        medias: true,
         sections: {
           orderBy: { position: 'asc' },
           include: {
@@ -124,7 +125,8 @@ export const websiteTemplateService = {
   },
 
   async create(payload: WebsiteTemplateBase) {
-    const { name, isActive, sections, primaryColor, logoUrl, bannersUrl, email, phone, footerDescription } = payload;
+    const { name, isActive, medias, sections, primaryColor, logoUrl, bannersUrl, email, phone, footerDescription } =
+      payload;
 
     const existedTemplate = await prisma.websiteTemplate.findFirst({
       where: { name }
@@ -153,6 +155,15 @@ export const websiteTemplateService = {
           footerDescription,
           isActive,
 
+          ...(medias?.length && {
+            medias: {
+              create: medias.map((m) => ({
+                type: m.type,
+                url: m.url
+              }))
+            }
+          }),
+
           sections: {
             create: sections.map((section) => ({
               title: section.title,
@@ -168,6 +179,7 @@ export const websiteTemplateService = {
           }
         },
         include: {
+          medias: true,
           sections: {
             include: {
               items: true
@@ -179,7 +191,8 @@ export const websiteTemplateService = {
   },
 
   async update(id: string, payload: Partial<WebsiteTemplateBase>) {
-    const { name, primaryColor, logoUrl, bannersUrl, isActive, email, phone, footerDescription, sections } = payload;
+    const { name, primaryColor, logoUrl, bannersUrl, isActive, email, phone, footerDescription, medias, sections } =
+      payload;
 
     const template = await prisma.websiteTemplate.findUnique({
       where: { id }
@@ -226,6 +239,23 @@ export const websiteTemplateService = {
         where: { id },
         data
       });
+
+      // ===== update medias =====
+      if (medias) {
+        await tx.websiteMedia.deleteMany({
+          where: { templateId: id }
+        });
+
+        if (medias.length) {
+          await tx.websiteMedia.createMany({
+            data: medias.map((m) => ({
+              templateId: id,
+              type: m.type,
+              url: m.url
+            }))
+          });
+        }
+      }
 
       // ===== update sections =====
       if (sections) {
