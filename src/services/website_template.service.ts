@@ -49,6 +49,9 @@ export const websiteTemplateService = {
 
   async getShowcase() {
     const template = await prisma.websiteTemplate.findFirst({
+      include: {
+        medias: true
+      },
       where: {
         isActive: true
       },
