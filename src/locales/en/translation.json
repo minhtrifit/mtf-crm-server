@@ -118,5 +118,13 @@
     "update_successfully": "Update faq successfully",
     "not_found": "Faq not found",
     "delete_successfully": "Delete faq successfully"
+  },
+  "store": {
+    "is_required": "Store ID is required",
+    "get_list_successfully": "Get store list successfully",
+    "get_detail_successfully": "Get store successfully",
+    "create_successfully": "Create store successfully",
+    "update_successfully": "Update store successfully",
+    "not_found": "Store not found"
   }
 }

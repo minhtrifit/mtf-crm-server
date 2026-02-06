@@ -22,6 +22,7 @@ import websiteTemplateRoutes from './routes/website_template.router';
 import statsRoutes from './routes/stats.router';
 import notificationRoutes from './routes/notification.router';
 import faqRoutes from './routes/faq.router';
+import storeRoutes from './routes/store.router';
 
 dotenv.config();
 
@@ -59,7 +60,7 @@ app.use(morganMiddleware);
 
 // Routes
 app.get('/', (req, res) => {
-  res.status(HTTP_STATUS.OK).json({ success: true, message: 'Welcome to Express Boilerplate!' });
+  res.status(HTTP_STATUS.OK).json({ success: true, message: 'Welcome to SERVER API!' });
 });
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
@@ -72,6 +73,7 @@ app.use('/api/website-template', websiteTemplateRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/notification', notificationRoutes);
 app.use('/api/faq', faqRoutes);
+app.use('/api/store', storeRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);

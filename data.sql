@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict TDhhE7mjsatxyX7ikA9YKasaQ1Y6F22TxbXzPS9mVCIdJqbbFqbLv3LiD6NcVs5
+\restrict HrqkTArrmWrHPkeqUHlGcc0I9AWcuHEz5hr4VZLbx9qJgafbKYieOD6uQkd3bna
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
 -- Dumped by pg_dump version 18.1 (Debian 18.1-1.pgdg13+2)
@@ -299,8 +299,18 @@ e1717b5d-fd3b-422f-b569-ba900b38af7e	5	Áo đẹp lắm, 10 điểm	30c7b3b0-b71
 COPY public."SearchKeyword" (id, title, count, "createdAt") FROM stdin;
 78f1598e-5d2a-41d4-9e98-a9aac26a06fc	áo sơ mi	1	2026-02-01 08:27:00.657
 204fd8bb-5296-41d1-8be1-79fd67976017	đồng hồ casio	1	2026-02-01 08:27:54.517
-bbb387c9-7d50-4643-9d26-fdf6b025b7a4	túi đeo chéo	1	2026-02-01 08:40:37.996
 58020150-f274-44b2-9f73-2f70a27c61bd	kính mát	2	2026-02-01 08:27:28.019
+bbb387c9-7d50-4643-9d26-fdf6b025b7a4	túi đeo chéo	2	2026-02-01 08:40:37.996
+\.
+
+
+--
+-- Data for Name: Store; Type: TABLE DATA; Schema: public; Owner: postgresql
+--
+
+COPY public."Store" (id, name, hotline, email, "taxCode", "createdAt", "updatedAt", "isActive", address) FROM stdin;
+043d846d-4b13-4957-ac03-25f377c0f28f	Cửa hàng chi nhánh 1 mới	123456788	store1contact@gmail.com	111222333444	2026-02-06 08:03:14.943	2026-02-06 08:07:04.037	t	Quận 1, Hồ Chí Minh, Việt Nam
+015d6666-957d-4ec4-9031-5eb6e1e5783b	Mini Store Hà Nội	11122233444	ministorehn.contact@gmail.com	0111222555	2026-02-06 08:07:53.894	2026-02-06 08:07:53.894	t	Hoàng Mai, Hà Nội
 \.
 
 
@@ -420,6 +430,9 @@ f2a597de-4070-4bec-b553-0bc1f2924d2c	8b8bb5b0eadbd49a925fd7843d3ee77403df6b077c6
 388cdf80-be05-446f-b0c6-770c1c3ebd4a	6bbd04aabcb002c94ce7b02b2623f36b688211b4e9932106b04431a08c7e670b	2026-02-01 04:33:11.26926+00	20260130102539_add_notification	\N	\N	2026-02-01 04:33:11.26214+00	1
 ad22fa0a-0923-4e37-a901-d47544398e1b	05a64e6703570285ee95789dcfe4ba89f99e1156f477554db7190c3ce10353e1	2026-02-02 03:48:57.399411+00	20260202034857_add_faq_table	\N	\N	2026-02-02 03:48:57.387915+00	1
 a2ac76f7-5cb1-4375-9532-33a039c809c2	ea49c5ab481fbe4ed64504330c633cc37456525981fc85f9aa4d293f426dfc48	2026-02-03 07:59:21.576827+00	20260203075921_add_website_template_media	\N	\N	2026-02-03 07:59:21.561468+00	1
+21d4a03b-ad7b-46d2-8946-2477d7e64634	d4f61459a7d286efc33e825bee6afddcfbf57a69892f2b36086d71e567624fe3	2026-02-06 03:38:14.473763+00	20260206033814_add_store_model	\N	\N	2026-02-06 03:38:14.458591+00	1
+0868dcff-2e7d-4591-a16c-a225fb777d40	ff6a597d3ba7ae0bb00e1514109dd962ea09b131f75d6f3eaa06d16ea34aed76	2026-02-06 03:41:02.587993+00	20260206034102_update_store	\N	\N	2026-02-06 03:41:02.58094+00	1
+f3d3d781-4046-4176-af03-24a6dfc3403b	4f6a0d633cddd21efe5e857bb7306a46c9f929053b97a68a2b6df92666d142b0	2026-02-06 04:11:52.925008+00	20260206041152_update_store_address	\N	\N	2026-02-06 04:11:52.917983+00	1
 \.
 
 
@@ -427,5 +440,5 @@ a2ac76f7-5cb1-4375-9532-33a039c809c2	ea49c5ab481fbe4ed64504330c633cc37456525981f
 -- PostgreSQL database dump complete
 --
 
-\unrestrict TDhhE7mjsatxyX7ikA9YKasaQ1Y6F22TxbXzPS9mVCIdJqbbFqbLv3LiD6NcVs5
+\unrestrict HrqkTArrmWrHPkeqUHlGcc0I9AWcuHEz5hr4VZLbx9qJgafbKYieOD6uQkd3bna
 

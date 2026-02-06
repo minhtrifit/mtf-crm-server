@@ -118,5 +118,13 @@
     "update_successfully": "Cập nhật câu hỏi thành công",
     "not_found": "Không tìm thấy câu hỏi",
     "delete_successfully": "Xóa câu hỏi thành công"
+  },
+  "store": {
+    "is_required": "Vui lòng chọn mã cửa hàng",
+    "get_list_successfully": "Lấy danh sách cửa hàng thành công",
+    "get_detail_successfully": "Lấy cửa hàng thành công",
+    "create_successfully": "Thêm mới cửa hàng thành công",
+    "update_successfully": "Cập nhật cửa hàng thành công",
+    "not_found": "Không tìm thấy cửa hàng"
   }
 }
