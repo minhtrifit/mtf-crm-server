@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict HrqkTArrmWrHPkeqUHlGcc0I9AWcuHEz5hr4VZLbx9qJgafbKYieOD6uQkd3bna
+\restrict sG1Z1WHreRuCkWE70CuYg2OGdxEeJAwSnageDSjgC5CPB4dkdbT68ehFIng9iAh
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
 -- Dumped by pg_dump version 18.1 (Debian 18.1-1.pgdg13+2)
@@ -308,9 +308,9 @@ bbb387c9-7d50-4643-9d26-fdf6b025b7a4	túi đeo chéo	2	2026-02-01 08:40:37.996
 -- Data for Name: Store; Type: TABLE DATA; Schema: public; Owner: postgresql
 --
 
-COPY public."Store" (id, name, hotline, email, "taxCode", "createdAt", "updatedAt", "isActive", address) FROM stdin;
-043d846d-4b13-4957-ac03-25f377c0f28f	Cửa hàng chi nhánh 1 mới	123456788	store1contact@gmail.com	111222333444	2026-02-06 08:03:14.943	2026-02-06 08:07:04.037	t	Quận 1, Hồ Chí Minh, Việt Nam
-015d6666-957d-4ec4-9031-5eb6e1e5783b	Mini Store Hà Nội	11122233444	ministorehn.contact@gmail.com	0111222555	2026-02-06 08:07:53.894	2026-02-06 08:07:53.894	t	Hoàng Mai, Hà Nội
+COPY public."Store" (id, name, hotline, email, "taxCode", "createdAt", "updatedAt", "isActive", address, code) FROM stdin;
+e5361944-d129-479d-8452-031950c3e7a6	Cửa hàng chi nhánh 1 mới	123456789	store1contact@gmail.com	111222333444	2026-02-06 09:53:55.62	2026-02-06 09:53:55.62	t	Quận 1, Hồ Chí Minh, Việt Nam	09LM5526
+d6a9b217-d3e0-4678-8959-a0b0d2b106b5	Mini Store Hà Nội	123555666	ministorehn.contact@gmail.com	0111222555	2026-02-06 09:54:18.806	2026-02-06 09:54:18.806	t	Hoàng Mai, Hà Nội	82CK8805
 \.
 
 
@@ -433,6 +433,7 @@ a2ac76f7-5cb1-4375-9532-33a039c809c2	ea49c5ab481fbe4ed64504330c633cc37456525981f
 21d4a03b-ad7b-46d2-8946-2477d7e64634	d4f61459a7d286efc33e825bee6afddcfbf57a69892f2b36086d71e567624fe3	2026-02-06 03:38:14.473763+00	20260206033814_add_store_model	\N	\N	2026-02-06 03:38:14.458591+00	1
 0868dcff-2e7d-4591-a16c-a225fb777d40	ff6a597d3ba7ae0bb00e1514109dd962ea09b131f75d6f3eaa06d16ea34aed76	2026-02-06 03:41:02.587993+00	20260206034102_update_store	\N	\N	2026-02-06 03:41:02.58094+00	1
 f3d3d781-4046-4176-af03-24a6dfc3403b	4f6a0d633cddd21efe5e857bb7306a46c9f929053b97a68a2b6df92666d142b0	2026-02-06 04:11:52.925008+00	20260206041152_update_store_address	\N	\N	2026-02-06 04:11:52.917983+00	1
+8f7e3130-405b-440d-b5fd-1e2e51aebdae	f83c22b0bcdeb947d1bcaba3556d530deaf5b341b4df6cd9645772b9f23b4654	2026-02-06 09:44:48.712983+00	20260206094448_update_store_code	\N	\N	2026-02-06 09:44:48.705987+00	1
 \.
 
 
@@ -440,5 +441,5 @@ f3d3d781-4046-4176-af03-24a6dfc3403b	4f6a0d633cddd21efe5e857bb7306a46c9f929053b9
 -- PostgreSQL database dump complete
 --
 
-\unrestrict HrqkTArrmWrHPkeqUHlGcc0I9AWcuHEz5hr4VZLbx9qJgafbKYieOD6uQkd3bna
+\unrestrict sG1Z1WHreRuCkWE70CuYg2OGdxEeJAwSnageDSjgC5CPB4dkdbT68ehFIng9iAh
 

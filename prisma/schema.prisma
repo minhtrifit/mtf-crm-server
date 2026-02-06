@@ -268,6 +268,7 @@ model Faq {
 
 model Store {
   id        String   @id @default(uuid())
+  code      String
   name      String
   address   String
   hotline   String

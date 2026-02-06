@@ -16,4 +16,5 @@ export interface StoreBase {
 
 export interface Store extends StoreBase {
   id: string;
+  code: string;
 }

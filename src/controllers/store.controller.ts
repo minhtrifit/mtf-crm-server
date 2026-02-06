@@ -18,6 +18,22 @@ export const getStores = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const getSearchStores = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+
+    const result = await storeService.getSearchList(req.query);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('store.get_list_successfully')
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getStore = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

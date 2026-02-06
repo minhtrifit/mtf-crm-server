@@ -1,6 +1,7 @@
 import { prisma } from '@/libs/prisma';
 import { GetStoresParams, StoreBase } from '@/models/Store';
 import { PagingType } from '@/models';
+import { generateCode } from '@/helpers';
 
 export enum StoreError {
   EXISTED = 'EXISTED',
@@ -23,7 +24,9 @@ export const storeService = {
       ...(isActive !== undefined && { isActive }),
       ...(q && {
         OR: [
+          { code: { contains: q, mode: 'insensitive' } },
           { name: { contains: q, mode: 'insensitive' } },
+          { address: { contains: q, mode: 'insensitive' } },
           { hotline: { contains: q, mode: 'insensitive' } },
           { email: { contains: q, mode: 'insensitive' } },
           { taxCode: { contains: q, mode: 'insensitive' } }
@@ -54,6 +57,41 @@ export const storeService = {
     };
   },
 
+  async getSearchList(params: GetStoresParams) {
+    const q = params.q?.trim();
+    let isActive: boolean | undefined = undefined;
+
+    if (params.isActive === 'true') isActive = true;
+    if (params.isActive === 'false') isActive = false;
+
+    const where: any = {
+      ...(isActive !== undefined && { isActive }),
+      ...(q && {
+        OR: [
+          { code: { contains: q, mode: 'insensitive' } },
+          { name: { contains: q, mode: 'insensitive' } },
+          { address: { contains: q, mode: 'insensitive' } },
+          { hotline: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } },
+          { taxCode: { contains: q, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.store.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
+      }),
+      prisma.store.count({ where })
+    ]);
+
+    return {
+      data,
+      total
+    };
+  },
+
   async getById(id: string) {
     const store = await prisma.store.findUnique({
       where: { id }
@@ -66,7 +104,10 @@ export const storeService = {
 
   async create(payload: StoreBase) {
     return prisma.store.create({
-      data: payload
+      data: {
+        code: generateCode({ prefix: false }),
+        ...payload
+      }
     });
   },
 
