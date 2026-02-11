@@ -25,6 +25,7 @@
 - ADMIN_CODE: (optional) use for create admin account (**MUST MATCH** with **VITE_ADMIN_CODE** in client .env)
 
 ```bash
+BASE_URL=http://localhost:5000
 PORT=5000
 NODE_ENV=development
 CLIENT_URL=http://localhost:3000
