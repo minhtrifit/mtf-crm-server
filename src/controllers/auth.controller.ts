@@ -14,7 +14,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       message: t('auth.register_success')
     });
   } catch (error: any) {
-    if (error.message === AuthError.NOT_FOUND) {
+    if (error.message === AuthError.EMAIL_EXISTED) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         data: null,
