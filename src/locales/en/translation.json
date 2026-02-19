@@ -126,5 +126,17 @@
     "create_successfully": "Create store successfully",
     "update_successfully": "Update store successfully",
     "not_found": "Store not found"
+  },
+  "policy": {
+    "is_required": "Policy ID is required",
+    "get_list_successfully": "Get policy list successfully",
+    "get_detail_successfully": "Get policy successfully",
+    "is_existed": "Policy is existed",
+    "title_existed": "Policy title is existed",
+    "slug_existed": "Policy slug is existed",
+    "create_successfully": "Create policy successfully",
+    "update_successfully": "Update policy successfully",
+    "not_found": "Policy not found",
+    "delete_successfully": "Delete policy successfully"
   }
 }

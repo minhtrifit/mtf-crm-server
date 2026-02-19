@@ -126,5 +126,17 @@
     "create_successfully": "Thêm mới cửa hàng thành công",
     "update_successfully": "Cập nhật cửa hàng thành công",
     "not_found": "Không tìm thấy cửa hàng"
+  },
+  "policy": {
+    "is_required": "Vui lòng chọn mã chính sách",
+    "get_list_successfully": "Lấy danh sách chính sách thành công",
+    "get_detail_successfully": "Lấy chính sách thành công",
+    "is_existed": "Chính sách đã tồn tại",
+    "title_existed": "Tên chính sách đã tồn tại",
+    "slug_existed": "Slug chính sách đã tồn tại",
+    "create_successfully": "Thêm mới chính sách thành công",
+    "update_successfully": "Cập nhật chính sách thành công",
+    "not_found": "Không tìm thấy chính sách",
+    "delete_successfully": "Xóa chính sách thành công"
   }
 }
