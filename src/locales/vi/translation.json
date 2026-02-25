@@ -138,5 +138,11 @@
     "update_successfully": "Cập nhật chính sách thành công",
     "not_found": "Không tìm thấy chính sách",
     "delete_successfully": "Xóa chính sách thành công"
+  },
+  "province": {
+    "list_success": "Lấy danh sách tỉnh thành thành công",
+    "detail_success": "Lấy thông tin tỉnh thành thành công",
+    "districts_success": "Lấy danh sách quận huyện thành công",
+    "not_found": "Không tìm thấy tỉnh thành"
   }
 }

@@ -24,6 +24,7 @@ import notificationRoutes from './routes/notification.router';
 import faqRoutes from './routes/faq.router';
 import storeRoutes from './routes/store.router';
 import policyRoutes from './routes/policy.router';
+import provinceRoutes from './routes/province.router';
 
 dotenv.config();
 
@@ -76,6 +77,7 @@ app.use('/api/notification', notificationRoutes);
 app.use('/api/faq', faqRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/policy', policyRoutes);
+app.use('/api/provinces', provinceRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);

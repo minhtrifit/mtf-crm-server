@@ -2,6 +2,8 @@ import { Faker, vi, en, base } from '@faker-js/faker';
 import { prisma } from '../src/libs/prisma';
 import { hashPassword } from '../src/libs/auth';
 import { Role } from '../src/models/User';
+import { PROVINCES_DATA } from './data/provinces';
+import { DISTRICTS_DATA } from './data/districts';
 
 const faker = new Faker({
   locale: [vi, en, base]
@@ -46,6 +48,22 @@ async function main() {
     data: [...baseUsers, ...generatedUsers],
     skipDuplicates: true
   });
+
+  // Seed provinces
+  await prisma.province.createMany({
+    data: PROVINCES_DATA,
+    skipDuplicates: true
+  });
+  console.log(`✅ Seeded ${PROVINCES_DATA.length} provinces`);
+
+  // Seed districts
+  if (DISTRICTS_DATA.length > 0) {
+    await prisma.district.createMany({
+      data: DISTRICTS_DATA,
+      skipDuplicates: true
+    });
+    console.log(`✅ Seeded ${DISTRICTS_DATA.length} districts`);
+  }
 
   console.log('✅ Seed successfully');
 }

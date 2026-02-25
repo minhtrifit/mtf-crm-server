@@ -138,5 +138,11 @@
     "update_successfully": "Update policy successfully",
     "not_found": "Policy not found",
     "delete_successfully": "Delete policy successfully"
+  },
+  "province": {
+    "list_success": "Get provinces list successfully",
+    "detail_success": "Get province detail successfully",
+    "districts_success": "Get districts list successfully",
+    "not_found": "Province not found"
   }
 }

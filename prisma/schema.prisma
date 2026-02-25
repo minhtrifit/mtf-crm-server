@@ -287,3 +287,28 @@ model Policy {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Province {
+  code        String     @id @db.VarChar(10)
+  name        String     @db.VarChar(100)
+  nameShort   String     @db.VarChar(50)
+  type        String     @db.VarChar(20)
+  region      String     @db.VarChar(20)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  districts   District[]
+}
+
+model District {
+  code         String    @id @db.VarChar(10)
+  name         String    @db.VarChar(100)
+  type         String    @db.VarChar(20)
+  provinceCode String    @db.VarChar(10)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  province     Province  @relation(fields: [provinceCode], references: [code], onDelete: Cascade)
+  
+  @@index([provinceCode])
+}
