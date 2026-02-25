@@ -138,6 +138,12 @@ Import data (**production** version)
 cmd /c "docker exec -i mtf-crm-database psql -U postgresql -d db < data.sql"
 ```
 
+Copy uploads folder from container -> source (**production** version)
+
+```console
+cmd /c "docker cp mtf-crm-api:/app/uploads/. ./uploads"
+```
+
 ## 📝 API List<a name="api-list"></a>
 
 ### Global Request Header
