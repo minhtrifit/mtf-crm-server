@@ -26,7 +26,9 @@
     "user_phone_existed": "Số điện thoại đã tồn tại",
     "user_not_found": "Người dùng không tồn tại",
     "create_successfully": "Thêm mới người dùng thành công",
-    "update_successfully": "Cập nhật người dùng thành công"
+    "update_successfully": "Cập nhật người dùng thành công",
+    "province_not_found": "Tỉnh/Thành phố không tồn tại",
+    "district_not_found": "Quận/Huyện không tồn tại"
   },
   "category": {
     "get_list_successfully": "Lấy danh sách danh mục thành công",

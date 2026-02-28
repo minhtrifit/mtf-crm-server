@@ -59,6 +59,12 @@ model User {
   avatar    String?  
   role      Role     @default(USER)
   isActive  Boolean  @default(true)
+  
+  // Province/District fields
+  provinceCode String? @db.VarChar(10)
+  provinceName String? @db.VarChar(100)
+  districtCode String? @db.VarChar(10)
+  districtName String? @db.VarChar(100)
 
   orders    Order[]
 

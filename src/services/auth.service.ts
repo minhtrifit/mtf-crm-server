@@ -15,7 +15,7 @@ export enum AuthError {
 
 export const authService = {
   async register(payload: RegisterPayload) {
-    const { email, password, fullName, phone, address } = payload;
+    const { email, password, fullName, phone, address, provinceCode, districtCode } = payload;
 
     // Find user with email
     const existedUser = await prisma.user.findUnique({
@@ -37,13 +37,35 @@ export const authService = {
     // Hash user password
     const hashedPassword = await hashPassword(password);
 
-    const newUser: UserPayload = {
+    // Lookup province and district names
+    let provinceName: string | null = null;
+    let districtName: string | null = null;
+
+    if (provinceCode) {
+      const province = await prisma.province.findUnique({
+        where: { code: provinceCode }
+      });
+      provinceName = province?.name || null;
+    }
+
+    if (districtCode) {
+      const district = await prisma.district.findUnique({
+        where: { code: districtCode }
+      });
+      districtName = district?.name || null;
+    }
+
+    const newUser = {
       email: email,
       password: hashedPassword,
       fullName: fullName,
       phone: phone ? phone : null,
       address: address ? address : null,
-      role: Role.USER
+      role: Role.USER,
+      provinceCode: provinceCode || null,
+      provinceName,
+      districtCode: districtCode || null,
+      districtName
     };
 
     const user = await prisma.user.create({

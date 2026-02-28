@@ -20,6 +20,9 @@ export const CreateSchema = Joi.object({
   fullName: Joi.string().required(),
   phone: Joi.string().allow('', null),
   address: Joi.string().allow('', null),
+  // Province/District fields
+  provinceCode: Joi.string().allow('', null).max(10).optional(),
+  districtCode: Joi.string().allow('', null).max(10).optional(),
   role: Joi.string()
     .valid(...roleValues)
     .optional()
@@ -31,6 +34,9 @@ export const UpdateSchema = Joi.object({
   phone: Joi.string().allow('').optional(),
   address: Joi.string().allow('').optional(),
   avatar: Joi.string().allow('').optional(),
+  // Province/District fields
+  provinceCode: Joi.string().allow('', null).max(10).optional(),
+  districtCode: Joi.string().allow('', null).max(10).optional(),
   role: Joi.string()
     .valid(...roleValues)
     .optional(),

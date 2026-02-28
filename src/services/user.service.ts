@@ -10,7 +10,40 @@ export enum UserError {
   EMAIL_EXISTED = 'USER_EMAIL_EXISTED',
   PHONE_EXISTED = 'USER_PHONE_EXISTED',
   NO_ACCESS_PERMISSION = 'NO_ACCESS_PERMISSION',
-  PHONE_REQUIRED = 'PHONE_REQUIRED'
+  PHONE_REQUIRED = 'PHONE_REQUIRED',
+  PROVINCE_NOT_FOUND = 'PROVINCE_NOT_FOUND',
+  DISTRICT_NOT_FOUND = 'DISTRICT_NOT_FOUND'
+}
+
+// Helper function to lookup province and district names
+async function getProvinceDistrictNames(
+  provinceCode?: string | null,
+  districtCode?: string | null
+): Promise<{ provinceName: string | null; districtName: string | null }> {
+  let provinceName: string | null = null;
+  let districtName: string | null = null;
+
+  if (provinceCode) {
+    const province = await prisma.province.findUnique({
+      where: { code: provinceCode }
+    });
+    if (!province) {
+      throw new Error(UserError.PROVINCE_NOT_FOUND);
+    }
+    provinceName = province.name;
+  }
+
+  if (districtCode) {
+    const district = await prisma.district.findUnique({
+      where: { code: districtCode }
+    });
+    if (!district) {
+      throw new Error(UserError.DISTRICT_NOT_FOUND);
+    }
+    districtName = district.name;
+  }
+
+  return { provinceName, districtName };
 }
 
 export const userService = {
@@ -132,6 +165,11 @@ export const userService = {
         avatar: true,
         phone: true,
         address: true,
+        // Province/District fields
+        provinceCode: true,
+        provinceName: true,
+        districtCode: true,
+        districtName: true,
         orders: {
           include: {
             payments: true
@@ -169,7 +207,7 @@ export const userService = {
   },
 
   async create(payload: UserPayload) {
-    const { email, password, fullName, phone, address, role } = payload;
+    const { email, password, fullName, phone, address, role, provinceCode, districtCode } = payload;
 
     // Check role
     // if (role && !isValidRole(role)) {
@@ -197,16 +235,24 @@ export const userService = {
       if (existedPhone) throw new Error(UserError.PHONE_EXISTED);
     }
 
+    // Lookup province and district names
+    const { provinceName, districtName } = await getProvinceDistrictNames(provinceCode, districtCode);
+
     // Hash user password
     const hashedPassword = await hashPassword(password);
 
-    const newUser: UserPayload = {
+    const newUser = {
       email: email,
       password: hashedPassword,
       fullName: fullName,
       phone: phone ? phone : null,
       address: address ? address : null,
-      role: role ? role : Role.USER
+      role: role ? role : Role.USER,
+      // Province/District fields
+      provinceCode: provinceCode || null,
+      provinceName,
+      districtCode: districtCode || null,
+      districtName
     };
 
     const user = await prisma.user.create({
@@ -230,7 +276,7 @@ export const userService = {
       throw new Error(UserError.NOT_FOUND);
     }
 
-    const { email, fullName, phone, address, avatar, isActive } = payload;
+    const { email, fullName, phone, address, avatar, isActive, provinceCode, districtCode } = payload;
 
     // Build data update
     const data: any = {};
@@ -273,6 +319,32 @@ export const userService = {
     if (avatar !== undefined) data.avatar = avatar;
     if (isActive !== undefined) data.isActive = isActive;
 
+    // Handle province/district update
+    if (provinceCode !== undefined || districtCode !== undefined) {
+      const newProvinceCode = provinceCode !== undefined ? provinceCode : user.provinceCode;
+      const newDistrictCode = districtCode !== undefined ? districtCode : user.districtCode;
+
+      // If clearing province, also clear district
+      if (provinceCode === null || provinceCode === '') {
+        data.provinceCode = null;
+        data.provinceName = null;
+        data.districtCode = null;
+        data.districtName = null;
+      } else {
+        const { provinceName, districtName } = await getProvinceDistrictNames(newProvinceCode, newDistrictCode);
+
+        if (provinceCode !== undefined) {
+          data.provinceCode = provinceCode || null;
+          data.provinceName = provinceName;
+        }
+
+        if (districtCode !== undefined) {
+          data.districtCode = districtCode || null;
+          data.districtName = districtName;
+        }
+      }
+    }
+
     // Update
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -285,6 +357,11 @@ export const userService = {
         address: true,
         avatar: true,
         isActive: true,
+        // Province/District fields
+        provinceCode: true,
+        provinceName: true,
+        districtCode: true,
+        districtName: true,
         createdAt: true,
         updatedAt: true
       }

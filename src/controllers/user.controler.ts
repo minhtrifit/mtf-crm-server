@@ -114,9 +114,20 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   try {
     const { t } = req;
 
-    const { email, password, fullName, phone, address, role } = req.validatedBody;
+    const { email, password, fullName, phone, address, role, provinceCode, districtCode } = req.validatedBody;
 
-    const user = await userService.create({ email, password, fullName, phone, address, role });
+    const user = await userService.create({
+      email,
+      password,
+      fullName,
+      phone,
+      address,
+      role,
+      provinceCode,
+      districtCode,
+      provinceName: null,
+      districtName: null
+    });
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
@@ -139,6 +150,20 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
           success: false,
           data: null,
           message: t('user.user_phone_existed')
+        });
+
+      case UserError.PROVINCE_NOT_FOUND:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.province_not_found')
+        });
+
+      case UserError.DISTRICT_NOT_FOUND:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.district_not_found')
         });
 
       default:
@@ -189,6 +214,20 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
           success: false,
           data: null,
           message: t('user.user_phone_existed')
+        });
+
+      case UserError.PROVINCE_NOT_FOUND:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.province_not_found')
+        });
+
+      case UserError.DISTRICT_NOT_FOUND:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          data: null,
+          message: t('user.district_not_found')
         });
 
       default:

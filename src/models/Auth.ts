@@ -6,6 +6,8 @@ export interface RegisterPayload {
   fullName: string;
   phone: string | null;
   address: string | null;
+  provinceCode?: string | null;
+  districtCode?: string | null;
   role?: Role;
 }
 
