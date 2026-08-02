@@ -62,6 +62,47 @@ export const addToCart = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const updateCartItemQuantity = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const jwtPayload = req.user;
+
+    const result = await cartService.updateCartItemQuantity(jwtPayload?.userId as string, req.validatedBody);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('cart.update_item_quantity_successfully')
+    });
+  } catch (error: any) {
+    if (error.message === CartError.ITEM_NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('product.not_found')
+      });
+    }
+
+    if (error.message === ProductError.NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('product.not_found')
+      });
+    }
+
+    if (error.message === CartError.INVALID_QUANTITY) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        data: null,
+        message: req.t('cart.invalid_quantity')
+      });
+    }
+
+    next(error);
+  }
+};
+
 export const clearCart = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

@@ -151,6 +151,7 @@
     "get_list_successfully": "Get cart successfully",
     "invalid_quantity": "Invalid quantity",
     "add_successfully": "Add to cart successfully",
-    "clear_successfully": "Clear cart successfully"
+    "clear_successfully": "Clear cart successfully",
+    "update_item_quantity_successfully": "Update cart quantity successfully"
   }
 }

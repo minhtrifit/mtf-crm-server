@@ -1,10 +1,12 @@
 import { prisma } from '@/libs/prisma';
-import { AddToCartPayload } from '@/models/Cart';
+import { AddToCartPayload, UpdateCartItemQuantityPayload } from '@/models/Cart';
 import { ProductError } from './product.service';
 import { AuthError } from './auth.service';
 
 export enum CartError {
-  INVALID_QUANTITY = 'INVALID_QUANTITY'
+  ITEM_NOT_FOUND = 'CART_ITEM_NOT_FOUND',
+  INVALID_QUANTITY = 'INVALID_QUANTITY',
+  QUANTITY_GREATER_THAN_ZERO = 'QUANTITY_GREATER_THAN_ZERO'
 }
 
 export const cartService = {
@@ -99,6 +101,77 @@ export const cartService = {
           }
         }
       });
+    });
+  },
+
+  async updateCartItemQuantity(userId: string, payload: UpdateCartItemQuantityPayload) {
+    const { cartItemId, quantity } = payload;
+
+    const cartItem = await prisma.cartItem.findFirst({
+      where: {
+        id: cartItemId,
+        cart: {
+          userId
+        }
+      },
+      include: {
+        product: true
+      }
+    });
+
+    if (!cartItem) throw new Error(CartError.ITEM_NOT_FOUND);
+
+    if (quantity <= 0) {
+      await prisma.cartItem.delete({
+        where: {
+          id: cartItem.id
+        }
+      });
+
+      return prisma.cart.findUnique({
+        where: {
+          userId
+        },
+        include: {
+          items: {
+            include: {
+              product: true
+            },
+            orderBy: {
+              createdAt: 'desc'
+            }
+          }
+        }
+      });
+    }
+
+    if (!cartItem.product.isActive) throw new Error(ProductError.NOT_FOUND);
+
+    if (quantity > cartItem.product.stock) throw new Error(CartError.INVALID_QUANTITY);
+
+    await prisma.cartItem.update({
+      where: {
+        id: cartItem.id
+      },
+      data: {
+        quantity
+      }
+    });
+
+    return prisma.cart.findUnique({
+      where: {
+        userId
+      },
+      include: {
+        items: {
+          include: {
+            product: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }
+      }
     });
   },
 
