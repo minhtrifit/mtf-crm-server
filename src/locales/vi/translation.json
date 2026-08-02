@@ -152,6 +152,7 @@
     "invalid_quantity": "Số lượng hàng không hợp lệ",
     "add_successfully": "Thêm sản phẩm vào giỏ hàng thành công",
     "clear_successfully": "Xóa giỏ hàng thành công",
-    "update_item_quantity_successfully": "Cập nhập số lượng sản phẩm thành công"
+    "update_item_quantity_successfully": "Cập nhập số lượng sản phẩm thành công",
+    "remove_item_successfully": "Xóa sản phẩm thành công"
   }
 }

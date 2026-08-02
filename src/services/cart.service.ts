@@ -1,5 +1,5 @@
 import { prisma } from '@/libs/prisma';
-import { AddToCartPayload, UpdateCartItemQuantityPayload } from '@/models/Cart';
+import { AddToCartPayload, RemoveCartItemPayload, UpdateCartItemQuantityPayload } from '@/models/Cart';
 import { ProductError } from './product.service';
 import { AuthError } from './auth.service';
 
@@ -155,6 +155,46 @@ export const cartService = {
       },
       data: {
         quantity
+      }
+    });
+
+    return prisma.cart.findUnique({
+      where: {
+        userId
+      },
+      include: {
+        items: {
+          include: {
+            product: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }
+      }
+    });
+  },
+
+  async removeCartItem(userId: string, payload: RemoveCartItemPayload) {
+    const { cartItemId } = payload;
+
+    const cartItem = await prisma.cartItem.findFirst({
+      where: {
+        id: cartItemId,
+        cart: {
+          userId
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!cartItem) throw new Error(CartError.ITEM_NOT_FOUND);
+
+    await prisma.cartItem.delete({
+      where: {
+        id: cartItem.id
       }
     });
 

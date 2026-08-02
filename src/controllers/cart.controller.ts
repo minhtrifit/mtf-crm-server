@@ -103,6 +103,31 @@ export const updateCartItemQuantity = async (req: Request, res: Response, next: 
   }
 };
 
+export const removeCartItem = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { t } = req;
+    const jwtPayload = req.user;
+
+    const result = await cartService.removeCartItem(jwtPayload?.userId as string, req.validatedBody);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result,
+      message: t('cart.remove_item_successfully')
+    });
+  } catch (error: any) {
+    if (error.message === CartError.ITEM_NOT_FOUND) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        data: null,
+        message: req.t('product.not_found')
+      });
+    }
+
+    next(error);
+  }
+};
+
 export const clearCart = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { t } = req;

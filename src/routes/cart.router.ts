@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { authenticateHandler } from '@/middlewares/auth';
-import { AddToCartSchema, UpdateCartItemQuantitySchema } from '@/dtos/cart.dto';
+import { AddToCartSchema, RemoveCartItemSchema, UpdateCartItemQuantitySchema } from '@/dtos/cart.dto';
 import { validateBody } from '@/middlewares/validate.middleware';
-import { addToCart, clearCart, getCart, updateCartItemQuantity } from '@/controllers/cart.controller';
+import { addToCart, clearCart, getCart, removeCartItem, updateCartItemQuantity } from '@/controllers/cart.controller';
 
 const router = Router();
 
@@ -14,6 +14,7 @@ router.patch(
   validateBody(UpdateCartItemQuantitySchema),
   updateCartItemQuantity
 );
+router.post('/remove-item', authenticateHandler, validateBody(RemoveCartItemSchema), removeCartItem);
 router.post('/clear', authenticateHandler, clearCart);
 
 export default router;

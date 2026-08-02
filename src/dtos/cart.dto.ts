@@ -9,3 +9,7 @@ export const UpdateCartItemQuantitySchema = Joi.object({
   cartItemId: Joi.string().required(),
   quantity: Joi.number().integer().min(0).required()
 });
+
+export const RemoveCartItemSchema = Joi.object({
+  cartItemId: Joi.string().required()
+});
