@@ -146,5 +146,11 @@
     "detail_success": "Lấy thông tin tỉnh thành thành công",
     "districts_success": "Lấy danh sách quận huyện thành công",
     "not_found": "Không tìm thấy tỉnh thành"
+  },
+  "cart": {
+    "get_list_successfully": "Lấy giỏ hàng thành công",
+    "invalid_quantity": "Số lượng hàng không hợp lệ",
+    "add_successfully": "Thêm sản phẩm vào giỏ hàng thành công",
+    "clear_successfully": "Xóa giỏ hàng thành công"
   }
 }
