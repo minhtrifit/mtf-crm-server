@@ -21,6 +21,7 @@ import { buildPaidTimeWhere } from '@/helpers/order.helper';
 import { PaymentMethod, PaymentPayload } from '@/models/Payment';
 import { socketEmit } from '@/sockets/socket.emitter';
 import { NotificationType } from '@/models/Notification';
+import { couponService } from '@/services/coupon.service';
 
 export enum OrderError {
   EXISTED = 'EXISTED',
@@ -296,7 +297,7 @@ export const orderService = {
   },
 
   async createCod(payload: OrderBody) {
-    const { userId, fullName, phone, deliveryAddress, note, items } = payload;
+    const { userId, fullName, phone, deliveryAddress, note, items, couponCode } = payload;
 
     const clientUrl = process.env.CLIENT_URL!;
     const clientCheckoutReturnPathname = process.env.CLIENT_CHECKOUT_RETURN_PATHNAME!;
@@ -341,7 +342,11 @@ export const orderService = {
       };
     });
 
-    const totalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
+    const subtotalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
+    const couponApplication = couponCode?.trim()
+      ? await couponService.applyCode(userId, couponCode, subtotalAmount)
+      : undefined;
+    const totalAmount = couponApplication?.totalAmount ?? subtotalAmount;
 
     // Transaction
 
@@ -362,6 +367,10 @@ export const orderService = {
             deliveryAddress,
             note,
             totalAmount,
+            subtotalAmount,
+            discountAmount: couponApplication?.discountAmount ?? 0,
+            couponCode: couponApplication?.coupon.code ?? null,
+            couponId: couponApplication?.coupon.id ?? null,
             items: {
               create: orderItems
             }
@@ -456,7 +465,7 @@ export const orderService = {
   },
 
   async createVnPay(t: TFunction<'translation', undefined>, ipAddr: string, payload: OrderBody) {
-    const { userId, fullName, phone, deliveryAddress, note, items } = payload;
+    const { userId, fullName, phone, deliveryAddress, note, items, couponCode } = payload;
 
     // Find user with userId
     const existedUser = await prisma.user.findUnique({
@@ -498,7 +507,11 @@ export const orderService = {
       };
     });
 
-    const totalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
+    const subtotalAmount = orderItems.reduce((sum: number, i: OrderItemPayload) => sum + i.quantity * i.price, 0);
+    const couponApplication = couponCode?.trim()
+      ? await couponService.applyCode(userId, couponCode, subtotalAmount)
+      : undefined;
+    const totalAmount = couponApplication?.totalAmount ?? subtotalAmount;
 
     // Transaction
     const order = await prisma.$transaction(
@@ -512,6 +525,10 @@ export const orderService = {
           deliveryAddress,
           note,
           totalAmount,
+          subtotalAmount,
+          discountAmount: couponApplication?.discountAmount ?? 0,
+          couponCode: couponApplication?.coupon.code ?? null,
+          couponId: couponApplication?.coupon.id ?? null,
           items: {
             create: orderItems
           }

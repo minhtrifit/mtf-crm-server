@@ -64,6 +64,25 @@
     "review_not_found": "Không tìm thấy đánh giá {{ reviewId }}",
     "delete_review_successfully": "Xóa đánh giá thành công"
   },
+  "coupon": {
+    "get_list_successfully": "Lấy danh sách mã giảm giá thành công",
+    "get_detail_successfully": "Lấy thông tin mã giảm giá thành công",
+    "create_successfully": "Tạo mã giảm giá thành công",
+    "update_successfully": "Cập nhật mã giảm giá thành công",
+    "delete_successfully": "Xóa mã giảm giá thành công",
+    "apply_successfully": "Áp dụng mã giảm giá thành công",
+    "COUPON_NOT_FOUND": "Mã giảm giá không tồn tại",
+    "COUPON_CODE_EXISTS": "Mã giảm giá đã tồn tại",
+    "COUPON_INACTIVE": "Mã giảm giá không còn hoạt động",
+    "COUPON_NOT_STARTED": "Mã giảm giá chưa có hiệu lực",
+    "COUPON_EXPIRED": "Mã giảm giá đã hết hạn",
+    "COUPON_MIN_ORDER_NOT_MET": "Đơn hàng chưa đạt giá trị tối thiểu để sử dụng mã",
+    "COUPON_USAGE_LIMIT_REACHED": "Mã giảm giá đã hết lượt sử dụng",
+    "COUPON_USER_LIMIT_REACHED": "Bạn đã sử dụng hết số lần được phép dùng mã này",
+    "COUPON_INVALID_DATE_RANGE": "Thời gian bắt đầu phải trước thời gian kết thúc",
+    "COUPON_INVALID_DISCOUNT_VALUE": "Giá trị giảm giá không hợp lệ",
+    "COUPON_INVALID_CART": "Giỏ hàng không hợp lệ hoặc sản phẩm không còn kinh doanh"
+  },
   "order": {
     "get_list_successfully": "Lấy danh sách đơn hàng thành công",
     "get_detail_successfully": "Lấy thông tin đơn hàng thành công",

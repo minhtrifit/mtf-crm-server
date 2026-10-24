@@ -2,6 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from '@/libs/auth';
 import { HTTP_STATUS } from '@/constants/http-status-code';
 import { OrderError, orderService } from '@/services/order.service';
+import { CouponError } from '@/services/coupon.service';
+import { Role } from '@/models/User';
+
+const handleCouponError = (error: any, req: Request, res: Response) => {
+  if (!Object.values(CouponError).includes(error.message)) return null;
+
+  return res.status(error.status ?? HTTP_STATUS.BAD_REQUEST).json({
+    success: false,
+    data: null,
+    message: req.t(`coupon.${error.message}`)
+  });
+};
 
 export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -82,7 +94,11 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
   try {
     const { t } = req;
 
-    const result = await orderService.createCod(req.validatedBody);
+    const payload = {
+      ...req.validatedBody,
+      ...(req.user?.role === Role.USER && { userId: req.user.userId })
+    };
+    const result = await orderService.createCod(payload);
 
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
@@ -91,6 +107,8 @@ export const createCodOrder = async (req: Request, res: Response, next: NextFunc
     });
   } catch (error: any) {
     const { t } = req;
+    const couponError = handleCouponError(error, req, res);
+    if (couponError) return couponError;
 
     switch (error.message) {
       case OrderError.USER_NOT_FOUND:
@@ -145,7 +163,11 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
 
     const ipAddr = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '';
 
-    const paymentUrl = await orderService.createVnPay(t, ipAddr, req.validatedBody);
+    const payload = {
+      ...req.validatedBody,
+      ...(req.user?.role === Role.USER && { userId: req.user.userId })
+    };
+    const paymentUrl = await orderService.createVnPay(t, ipAddr, payload);
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -154,6 +176,8 @@ export const createVNPayOrder = async (req: Request, res: Response, next: NextFu
     });
   } catch (error: any) {
     const { t } = req;
+    const couponError = handleCouponError(error, req, res);
+    if (couponError) return couponError;
 
     switch (error.message) {
       case OrderError.USER_NOT_FOUND:

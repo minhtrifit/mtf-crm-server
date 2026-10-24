@@ -64,6 +64,25 @@
     "review_not_found": "Review {{ reviewId }} not found",
     "delete_review_successfully": "Delete review successfully"
   },
+  "coupon": {
+    "get_list_successfully": "Get coupons successfully",
+    "get_detail_successfully": "Get coupon successfully",
+    "create_successfully": "Create coupon successfully",
+    "update_successfully": "Update coupon successfully",
+    "delete_successfully": "Delete coupon successfully",
+    "apply_successfully": "Apply coupon successfully",
+    "COUPON_NOT_FOUND": "Coupon code not found",
+    "COUPON_CODE_EXISTS": "Coupon code already exists",
+    "COUPON_INACTIVE": "Coupon is inactive",
+    "COUPON_NOT_STARTED": "Coupon is not active yet",
+    "COUPON_EXPIRED": "Coupon has expired",
+    "COUPON_MIN_ORDER_NOT_MET": "Order subtotal does not meet the coupon minimum",
+    "COUPON_USAGE_LIMIT_REACHED": "Coupon usage limit has been reached",
+    "COUPON_USER_LIMIT_REACHED": "You have reached the usage limit for this coupon",
+    "COUPON_INVALID_DATE_RANGE": "Coupon start date must be before its expiration date",
+    "COUPON_INVALID_DISCOUNT_VALUE": "Coupon discount value is invalid",
+    "COUPON_INVALID_CART": "Cart is invalid or contains unavailable products"
+  },
   "order": {
     "get_list_successfully": "Get orders successfully",
     "get_detail_successfully": "Get order successfully",

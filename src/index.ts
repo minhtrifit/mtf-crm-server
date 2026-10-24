@@ -26,6 +26,7 @@ import storeRoutes from './routes/store.router';
 import policyRoutes from './routes/policy.router';
 import provinceRoutes from './routes/province.router';
 import cartRoutes from './routes/cart.router';
+import couponRoutes from './routes/coupon.router';
 
 dotenv.config();
 
@@ -80,6 +81,7 @@ app.use('/api/store', storeRoutes);
 app.use('/api/policy', policyRoutes);
 app.use('/api/provinces', provinceRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/coupon', couponRoutes);
 
 // Error handling middleware
 app.use(multerErrorHandler);

@@ -34,6 +34,7 @@ export const CreateSchema = Joi.object({
   phone: Joi.string().required(),
   deliveryAddress: Joi.string().required(),
   note: Joi.string().allow(''),
+  couponCode: Joi.string().trim().uppercase().max(50).allow('').optional(),
 
   items: Joi.array()
     .items(

@@ -54,6 +54,7 @@ export interface OrderBody {
   phone: string;
   deliveryAddress: string;
   note: string;
+  couponCode?: string;
   items: OrderItemPayload[];
 }
 
@@ -81,6 +82,10 @@ export interface OrderPayload {
   deliveryAddress: string;
   note: string | null;
   totalAmount: number;
+  subtotalAmount?: number;
+  discountAmount?: number;
+  couponCode?: string | null;
+  couponId?: string | null;
   items: {
     create: OrderItemPayload[];
   };
