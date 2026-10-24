@@ -41,6 +41,19 @@ export const getCoupons = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const getPublicCoupons = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const coupons = await couponService.getPublicList();
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: coupons,
+      message: req.t('coupon.get_public_list_successfully')
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const getCoupon = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const coupon = await couponService.getById(req.validatedParams.id);

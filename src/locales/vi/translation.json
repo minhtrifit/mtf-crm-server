@@ -66,6 +66,7 @@
   },
   "coupon": {
     "get_list_successfully": "Lấy danh sách mã giảm giá thành công",
+    "get_public_list_successfully": "Lấy danh sách mã giảm giá công khai thành công",
     "get_detail_successfully": "Lấy thông tin mã giảm giá thành công",
     "create_successfully": "Tạo mã giảm giá thành công",
     "update_successfully": "Cập nhật mã giảm giá thành công",

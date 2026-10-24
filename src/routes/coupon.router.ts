@@ -11,12 +11,14 @@ import {
   deleteCoupon,
   getCoupon,
   getCoupons,
+  getPublicCoupons,
   updateCoupon
 } from '@/controllers/coupon.controller';
 
 const router = Router();
 
 router.post('/apply', authenticateHandler, authorizeHandler(Role.USER), validateBody(ApplySchema), applyCoupon);
+router.get('/public', getPublicCoupons);
 router.get('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateQuery(GetQuerySchema), getCoupons);
 router.get(
   '/detail/:id',

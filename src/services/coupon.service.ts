@@ -19,6 +19,47 @@ export enum CouponError {
 }
 
 export const couponService = {
+  async getPublicList() {
+    const now = new Date();
+    const coupons = await prisma.coupon.findMany({
+      where: {
+        isPublic: true,
+        isActive: true,
+        startsAt: { lte: now },
+        expiresAt: { gte: now }
+      },
+      orderBy: [{ expiresAt: 'asc' }, { createdAt: 'desc' }],
+      select: {
+        id: true,
+        code: true,
+        description: true,
+        type: true,
+        value: true,
+        minOrderAmount: true,
+        maxDiscountAmount: true,
+        startsAt: true,
+        expiresAt: true,
+        usageLimit: true
+      }
+    });
+    const couponIds = coupons.map((coupon) => coupon.id);
+    const usageCounts = couponIds.length
+      ? await prisma.order.groupBy({
+          by: ['couponId'],
+          where: {
+            couponId: { in: couponIds },
+            status: { not: 'CANCELLED' }
+          },
+          _count: { _all: true }
+        })
+      : [];
+    const usageCountByCouponId = new Map(usageCounts.map((usage) => [usage.couponId, usage._count._all]));
+
+    return coupons
+      .filter((coupon) => coupon.usageLimit === null || (usageCountByCouponId.get(coupon.id) ?? 0) < coupon.usageLimit)
+      .map(({ usageLimit, ...coupon }) => coupon);
+  },
+
   async getList(params: GetCouponsParams) {
     const page = Math.max(Number(params.page) || 1, 1);
     const limit = Math.min(Number(params.limit) || 10, 100);

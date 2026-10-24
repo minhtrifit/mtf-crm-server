@@ -219,6 +219,7 @@ model Coupon {
   perUserLimit        Int            @default(1)
 
   isActive            Boolean        @default(true)
+  isPublic            Boolean        @default(false)
 
   orders              Order[]
 

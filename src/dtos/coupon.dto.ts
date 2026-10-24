@@ -25,7 +25,8 @@ const couponFields = {
   expiresAt: Joi.date().iso(),
   usageLimit: Joi.number().integer().positive().allow(null),
   perUserLimit: Joi.number().integer().positive(),
-  isActive: Joi.boolean()
+  isActive: Joi.boolean(),
+  isPublic: Joi.boolean()
 };
 
 export const CreateSchema = Joi.object({

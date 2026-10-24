@@ -66,6 +66,7 @@
   },
   "coupon": {
     "get_list_successfully": "Get coupons successfully",
+    "get_public_list_successfully": "Get public coupons successfully",
     "get_detail_successfully": "Get coupon successfully",
     "create_successfully": "Create coupon successfully",
     "update_successfully": "Update coupon successfully",

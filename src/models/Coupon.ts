@@ -22,6 +22,7 @@ export interface CouponPayload {
   usageLimit?: number | null;
   perUserLimit?: number;
   isActive?: boolean;
+  isPublic?: boolean;
 }
 
 export interface ApplyCouponPayload {
