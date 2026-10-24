@@ -36,7 +36,7 @@ export const couponService = {
       ...(isActive !== undefined && { isActive })
     };
 
-    const [data, total] = await Promise.all([
+    const [coupons, total] = await Promise.all([
       prisma.coupon.findMany({
         where,
         skip,
@@ -45,6 +45,23 @@ export const couponService = {
       }),
       prisma.coupon.count({ where })
     ]);
+
+    const couponIds = coupons.map((coupon) => coupon.id);
+    const usageCounts = couponIds.length
+      ? await prisma.order.groupBy({
+          by: ['couponId'],
+          where: {
+            couponId: { in: couponIds },
+            status: { not: 'CANCELLED' }
+          },
+          _count: { _all: true }
+        })
+      : [];
+    const usageCountByCouponId = new Map(usageCounts.map((usage) => [usage.couponId, usage._count._all]));
+    const data = coupons.map((coupon) => ({
+      ...coupon,
+      usedCount: usageCountByCouponId.get(coupon.id) ?? 0
+    }));
 
     const paging: PagingType = {
       current_page: page,
