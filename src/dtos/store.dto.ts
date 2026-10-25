@@ -16,7 +16,9 @@ export const CreateSchema = Joi.object({
   address: Joi.string().required(),
   hotline: Joi.string().required(),
   email: Joi.string().required(),
-  taxCode: Joi.string().required()
+  taxCode: Joi.string().required(),
+  image: Joi.string().allow('', null).optional(),
+  mapLocation: Joi.string().allow('', null).optional()
 });
 
 export const UpdateSchema = Joi.object({
@@ -25,5 +27,7 @@ export const UpdateSchema = Joi.object({
   hotline: Joi.string().min(1).optional(),
   email: Joi.string().min(1).optional(),
   taxCode: Joi.string().min(1).optional(),
+  image: Joi.string().allow('', null).optional(),
+  mapLocation: Joi.string().allow('', null).optional(),
   isActive: Joi.boolean().optional()
 });

@@ -9,6 +9,27 @@ export enum StoreError {
 }
 
 export const storeService = {
+  async getWebsiteList() {
+    const data = await prisma.store.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        hotline: true,
+        email: true,
+        image: true,
+        mapLocation: true
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }]
+    });
+
+    return {
+      data,
+      total: data.length
+    };
+  },
+
   async getList(params: GetStoresParams) {
     const page = Math.max(Number(params.page) || 1, 1);
     const limit = Math.min(Number(params.limit) || 10, 100);
@@ -130,6 +151,10 @@ export const storeService = {
     if (payload.email !== undefined) data.email = payload.email;
 
     if (payload.taxCode !== undefined) data.taxCode = payload.taxCode;
+
+    if (payload.image !== undefined) data.image = payload.image;
+
+    if (payload.mapLocation !== undefined) data.mapLocation = payload.mapLocation;
 
     if (payload.isActive !== undefined) data.isActive = payload.isActive;
 

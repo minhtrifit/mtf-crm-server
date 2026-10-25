@@ -353,16 +353,18 @@ model Faq {
 }
 
 model Store {
-  id        String   @id @default(uuid())
-  code      String
-  name      String
-  address   String
-  hotline   String
-  email     String
-  taxCode   String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  code        String
+  name        String
+  address     String
+  hotline     String
+  email       String
+  taxCode     String
+  image       String?
+  mapLocation String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Policy {

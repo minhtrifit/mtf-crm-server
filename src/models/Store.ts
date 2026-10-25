@@ -11,6 +11,8 @@ export interface StoreBase {
   hotline: string;
   email: string;
   taxCode: string;
+  image?: string | null;
+  mapLocation?: string | null;
   isActive?: boolean;
 }
 

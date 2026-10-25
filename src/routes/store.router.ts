@@ -5,10 +5,18 @@ import { CreateSchema, GetParamsSchema, GetQuerySchema, UpdateSchema } from '@/d
 import { validateQuery } from '@/middlewares/validate-query.middleware';
 import { validateParams } from '@/middlewares/validate-params.middleware';
 import { validateBody } from '@/middlewares/validate.middleware';
-import { createStore, getSearchStores, getStore, getStores, updateStore } from '@/controllers/store.controller';
+import {
+  createStore,
+  getSearchStores,
+  getStore,
+  getStores,
+  getWebsiteStores,
+  updateStore
+} from '@/controllers/store.controller';
 
 const router = Router();
 
+router.get('/website', getWebsiteStores);
 router.get('/', authenticateHandler, authorizeHandler(Role.ADMIN), validateQuery(GetQuerySchema), getStores);
 router.get(
   '/search',
